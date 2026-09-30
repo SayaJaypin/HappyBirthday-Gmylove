@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#071225">
+  <meta name="description" content="A special interactive birthday gift made especially for Aa, M Gilang Ramadhan.">
+  <meta property="og:title" content="For Aa, M Gilang Ramadhan — A Birthday Gift">
+  <meta property="og:description" content="A little digital birthday gift made with care, distance, memories, wishes, and love.">
+  <meta property="og:type" content="website">
+  <title>For Aa, M Gilang Ramadhan — A Birthday Gift</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='25' fill='%23071125'/%3E%3Cpath d='M50 78C23 62 18 46 27 35c7-9 18-9 23 0 5-9 16-9 23 0 9 11 4 27-23 43z' fill='%23d83d62'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <div id="loader" class="loader">
+    <div class="loader-inner">
+      <div class="loader-mark"></div>
+      <p>Preparing something special...</p>
+      <div class="loader-line">
+        <span id="loaderProgress"></span>
+      </div>
+    </div>
+  </div>
+
+  <div id="opening" class="opening">
+    <div class="opening-noise"></div>
+    <div class="opening-orb orb-one"></div>
+    <div class="opening-orb orb-two"></div>
+
+    <div class="opening-content">
+      <span class="opening-eyebrow">A LITTLE BIRTHDAY GIFT</span>
+
+      <h1>
+        made especially<br>
+        <em>for you.</em>
+      </h1>
+
+      <div class="opening-divider"></div>
+
+      <p class="opening-for">For Aa,</p>
+      <h2>M Gilang Ramadhan</h2>
+      <p class="opening-date">1 October</p>
+
+      <button id="openGiftBtn" class="btn btn-primary">
+        <span>Open Your Gift</span>
+        <i></i>
+      </button>
+
+      <p class="opening-hint">tap when you're ready</p>
+    </div>
+  </div>
+
+  <div id="app" class="app">
+
+    <canvas id="ambientCanvas" class="ambient-canvas"></canvas>
+
+    <header class="topbar">
+      <a href="#home" class="brand" aria-label="Home">
+        <span class="brand-dot"></span>
+        <span>for aa.</span>
+      </a>
+
+      <button id="musicToggle" class="music-toggle" aria-label="Play music">
+        <span class="music-bars">
+          <b></b><b></b><b></b><b></b>
+        </span>
+        <span class="music-label">Shape of My Heart</span>
+      </button>
+    </header>
+
+    <audio id="bgMusic" preload="metadata" loop>
+      <source src="assets/music/music.mp3" type="audio/mpeg">
+    </audio>
+
+    <main>
+
+      <!-- HOME -->
+      <section id="home" class="section hero-section">
+        <div class="section-glow glow-blue"></div>
+        <div class="hero-grid"></div>
+
+        <div class="container hero-content reveal">
+          <span class="eyebrow">01 — A DAY WORTH REMEMBERING</span>
+
+          <h1 class="hero-title">
+            Happy Birthday,<br>
+            <em>Aa.</em>
+          </h1>
+
+          <p class="hero-date">1 October</p>
+
+          <p class="hero-copy">
+            Hari ini mungkin hanya terlihat seperti satu tanggal di kalender,
+            tetapi bagiku, 1 Oktober selalu punya arti yang jauh lebih istimewa.
+          </p>
+
+          <p class="hero-copy muted">
+            Karena di tanggal ini, seseorang yang begitu berarti dalam hidupku
+            lahir ke dunia. Dan meskipun kita dipisahkan jarak, ada banyak hal
+            yang tetap bisa sampai tanpa harus berada di tempat yang sama:
+            doa, perhatian, kabar, suara, dan rasa sayang.
+          </p>
+
+          <div class="hero-actions">
+            <a href="#gift" class="btn btn-primary">Open the Gift</a>
+            <a href="#story" class="btn btn-ghost">Explore the Story</a>
+          </div>
+        </div>
+
+        <div class="scroll-cue">
+          <span>SCROLL TO EXPLORE</span>
+          <i></i>
+        </div>
+      </section>
+
+      <!-- GIFT -->
+      <section id="gift" class="section gift-section">
+        <div class="container">
+          <div class="section-heading reveal">
+            <span class="eyebrow">02 — SOMETHING FOR YOU</span>
+            <h2>A little gift,<br><em>from a distance.</em></h2>
+            <p>
+              Ada sesuatu yang ingin kuberikan. Bukan sesuatu yang bisa
+              dibungkus dengan pita, tetapi sesuatu yang dibuat khusus
+              untuk hari spesialmu.
+            </p>
+          </div>
+
+          <div class="gift-stage reveal">
+            <div class="gift-glow"></div>
+
+            <div id="giftBox" class="gift-box" role="button" tabindex="0" aria-label="Open gift">
+              <div class="gift-shadow"></div>
+              <div class="gift-lid">
+                <div class="gift-ribbon horizontal"></div>
+                <div class="lid-top"></div>
+              </div>
+              <div class="gift-body">
+                <div class="gift-ribbon vertical"></div>
+                <div class="gift-panel"></div>
+              </div>
+              <div class="gift-bow">
+                <span></span>
+                <span></span>
+                <i></i>
+              </div>
+            </div>
+
+            <button id="giftOpenBtn" class="btn btn-primary">
+              Open Gift
+            </button>
+
+            <div id="giftMessage" class="gift-message">
+              <span class="eyebrow">A MESSAGE INSIDE</span>
+              <h3>Untuk Aa,<br>yang selalu punya tempat khusus.</h3>
+              <p>
+                Hadiah ini mungkin hanya berada di dalam layar,
+                tapi setiap detail di dalamnya dibuat dengan satu niat:
+                membuatmu merasa dirayakan.
+              </p>
+              <a href="#story" class="text-link">Continue the story <span>→</span></a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- STORY -->
+      <section id="story" class="section story-section">
+        <div class="container">
+          <div class="section-heading reveal">
+            <span class="eyebrow">03 — TWO PLACES, ONE CONNECTION</span>
+            <h2>Jarak tidak selalu<br><em>berarti jauh.</em></h2>
+          </div>
+
+          <div class="story-layout">
+            <div class="story-intro reveal">
+              <p class="large-copy">
+                Ada hubungan yang tumbuh bukan karena sering berada di
+                tempat yang sama, tetapi karena dua orang memilih untuk
+                tetap hadir meskipun jarak terus berada di antara mereka.
+              </p>
+
+              <div class="story-line"></div>
+
+              <p>
+                Kita mungkin mengenal satu sama lain melalui layar,
+                melalui pesan yang terkadang datang terlambat,
+                melalui suara yang menjadi teman di tengah kesibukan,
+                dan melalui kabar-kabar kecil yang mungkin terlihat sederhana.
+              </p>
+            </div>
+
+            <div class="story-cards">
+              <article class="glass-card story-card reveal">
+                <span class="card-number">01</span>
+                <h3>Pesan kecil</h3>
+                <p>
+                  Satu pesan sederhana bisa menjadi alasan seseorang
+                  merasa diperhatikan di tengah hari yang panjang.
+                </p>
+              </article>
+
+              <article class="glass-card story-card reveal">
+                <span class="card-number">02</span>
+                <h3>Waktu yang berbeda</h3>
+                <p>
+                  Jam mungkin menunjukkan angka yang berbeda,
+                  tetapi perhatian tidak pernah membutuhkan zona waktu.
+                </p>
+              </article>
+
+              <article class="glass-card story-card reveal">
+                <span class="card-number">03</span>
+                <h3>Tetap hadir</h3>
+                <p>
+                  Tidak harus selalu dekat untuk tetap menjadi
+                  seseorang yang penting.
+                </p>
+              </article>
+
+              <article class="glass-card story-card reveal">
+                <span class="card-number">04</span>
+                <h3>Doa dari jauh</h3>
+                <p>
+                  Ada hal-hal yang tidak bisa kulakukan dari jauh,
+                  tetapi selalu ada doa yang bisa kukirimkan.
+                </p>
+              </article>
+            </div>
+          </div>
+
+          <div class="story-ending reveal">
+            <p>
+              Mungkin jarak membuat kita tidak selalu bisa berada
+              di tempat yang sama. Tetapi selama masih ada kabar,
+              perhatian, kesabaran, dan dua hati yang masih memilih
+              untuk saling menguatkan, jarak hanyalah angka di antara dua tempat.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- CLOCK -->
+      <section id="clock" class="section clock-section">
+        <div class="container">
+          <div class="section-heading centered reveal">
+            <span class="eyebrow">04 — TWO PLACES, ONE MOMENT</span>
+            <h2>Different clocks.<br><em>Same moment.</em></h2>
+            <p>
+              Mungkin jam kita tidak selalu menunjukkan angka yang sama,
+              tetapi setiap detik tetap membawa satu hal yang sama:
+              harapan agar kamu baik-baik saja.
+            </p>
+          </div>
+
+          <div class="clock-grid">
+            <div class="clock-region reveal">
+              <div class="region-title">
+                <span class="region-dot"></span>
+                <span>INDONESIA</span>
+              </div>
+
+              <div class="clock-cards">
+                <article class="clock-card glass-card">
+                  <div>
+                    <small>WIB</small>
+                    <strong id="clockJakarta">--:--:--</strong>
+                    <span>Jakarta</span>
+                  </div>
+                </article>
+
+                <article class="clock-card glass-card">
+                  <div>
+                    <small>WITA</small>
+                    <strong id="clockMakassar">--:--:--</strong>
+                    <span>Makassar</span>
+                  </div>
+                </article>
+
+                <article class="clock-card glass-card">
+                  <div>
+                    <small>WIT</small>
+                    <strong id="clockJayapura">--:--:--</strong>
+                    <span>Jayapura</span>
+                  </div>
+                </article>
+              </div>
+            </div>
+
+            <div class="clock-region reveal">
+              <div class="region-title">
+                <span class="region-dot japan-dot"></span>
+                <span>JAPAN</span>
+              </div>
+
+              <article class="clock-card main-clock glass-card">
+                <div>
+                  <small>JST</small>
+                  <strong id="clockTokyo">--:--:--</strong>
+                  <span>Tokyo</span>
+                  <em id="clockDate">--</em>
+                </div>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- MEMORIES -->
+      <section id="memories" class="section memories-section">
+        <div class="container">
+          <div class="section-heading reveal">
+            <span class="eyebrow">05 — MEMORIES</span>
+            <h2>Eight little<br><em>pieces of you.</em></h2>
+            <p>
+              Tidak perlu banyak kata. Beberapa hal memang lebih indah
+              ketika dibiarkan berbicara melalui gambar.
+            </p>
+          </div>
+
+          <div class="gallery-wrap reveal">
+            <button class="gallery-arrow gallery-prev" aria-label="Previous photo">←</button>
+
+            <div id="gallery" class="gallery">
+              <div class="photo-card active">
+                <img src="assets/photos/photo-1.jpg" alt="Memory 1" loading="eager">
+              </div>
+              <div class="photo-card">
+                <img src="assets/photos/photo-2.jpg" alt="Memory 2" loading="lazy">
+              </div>
+              <div class="photo-card">
+                <img src="assets/photos/photo-3.jpg" alt="Memory 3" loading="lazy">
+              </div>
+              <div class="photo-card">
+                <img src="assets/photos/photo-4.jpg" alt="Memory 4" loading="lazy">
+              </div>
+              <div class="photo-card">
+                <img src="assets/photos/photo-5.jpg" alt="Memory 5" loading="lazy">
+              </div>
+              <div class="photo-card">
+                <img src="assets/photos/photo-6.jpg" alt="Memory 6" loading="lazy">
+              </div>
+              <div class="photo-card">
+                <img src="assets/photos/photo-7.jpg" alt="Memory 7" loading="lazy">
+              </div>
+              <div class="photo-card">
+                <img src="assets/photos/photo-8.jpg" alt="Memory 8" loading="lazy">
+              </div>
+            </div>
+
+            <button class="gallery-arrow gallery-next" aria-label="Next photo">→</button>
+          </div>
+
+          <div id="galleryDots" class="gallery-dots" aria-label="Gallery pagination"></div>
+        </div>
+      </section>
+
+      <!-- LETTER -->
+      <section id="letter" class="section letter-section">
+        <div class="container">
+          <div class="section-heading centered reveal">
+            <span class="eyebrow">06 — A LETTER</span>
+            <h2>Words I wanted<br><em>you to keep.</em></h2>
+          </div>
+
+          <div class="letter-wrap reveal">
+            <article class="letter-paper">
+              <div class="paper-deco"></div>
+
+              <span class="letter-date">1 OCTOBER</span>
+
+              <h3>Untuk Aa,</h3>
+
+              <p>
+                Selamat ulang tahun.
+              </p>
+
+              <p>
+                Hari ini aku ingin berhenti sebentar dari semua hal yang
+                biasanya kita lakukan, hanya untuk mengingatkanmu bahwa
+                keberadaanmu adalah sesuatu yang sangat berarti.
+                Ada seseorang di dunia ini yang hari ini tersenyum karena
+                tahu bahwa kamu pernah lahir, tumbuh, berjuang, dan menjadi
+                dirimu yang sekarang.
+              </p>
+
+              <p>
+                Aku ingin kamu tahu bahwa aku menghargai banyak hal tentangmu.
+                Bukan hanya hal-hal yang terlihat dari luar, tetapi juga
+                ketulusanmu, usahamu, keberanianmu untuk terus berjalan,
+                kesabaranmu menghadapi keadaan, dan caramu tetap mencoba
+                meskipun tidak semua hari terasa mudah.
+              </p>
+
+              <p>
+                Aku bangga dengan setiap langkah yang kamu ambil.
+                Bahkan ketika hasilnya belum sesuai dengan apa yang kamu
+                harapkan, usaha yang kamu berikan tetap punya arti.
+                Jangan pernah menganggap perjuanganmu sia-sia hanya karena
+                hasilnya membutuhkan waktu.
+              </p>
+
+              <p>
+                Aku tahu akhir-akhir ini ada banyak hal yang harus kamu jalani,
+                termasuk pekerjaanmu di Jepang. Semoga pekerjaanmu selalu
+                dimudahkan. Semoga kamu diberi kesehatan, tenaga yang cukup,
+                lingkungan yang baik, dan orang-orang yang memperlakukanmu
+                dengan baik.
+              </p>
+
+              <p>
+                Kalau suatu hari pekerjaan terasa terlalu melelahkan,
+                semoga kamu tetap ingat bahwa kamu tidak harus selalu
+                menjadi kuat setiap detik. Beristirahat bukan berarti menyerah.
+                Menjaga diri bukan berarti lemah. Kamu juga pantas mendapatkan
+                waktu untuk bernapas.
+              </p>
+
+              <p>
+                Aku berharap semua lelah yang kamu jalani hari ini suatu hari
+                berubah menjadi sesuatu yang membuatmu tersenyum dan berkata,
+                "ternyata semua ini memang layak diperjuangkan."
+              </p>
+
+              <p>
+                Mungkin aku tidak selalu bisa berada di dekatmu.
+                Aku tidak bisa melihat langsung bagaimana harimu berjalan,
+                tidak bisa tiba-tiba datang ketika kamu sedang lelah,
+                dan tidak bisa menggantikan semua hal yang harus kamu hadapi.
+                Tetapi dari jauh, aku tetap bisa menemanimu dengan caraku:
+                mendengarkan ceritamu, menunggu kabarmu, mendoakanmu,
+                menyemangatimu, dan mengingatkanmu bahwa kamu tidak sendirian.
+              </p>
+
+              <p>
+                Mungkin jarak membuat kita tidak selalu bisa berada
+                di tempat yang sama, tetapi perhatian tidak mengenal
+                jarak sejauh apa pun.
+              </p>
+
+              <p>
+                Di ulang tahunmu kali ini, aku tidak hanya berharap
+                kamu mendapatkan hal-hal yang kamu inginkan.
+                Aku juga berharap kamu mendapatkan ketenangan,
+                kesehatan, kesempatan baru, orang-orang baik,
+                dan keberanian untuk terus mengejar kehidupan yang kamu impikan.
+              </p>
+
+              <p>
+                Jangan terlalu keras kepada dirimu sendiri.
+                Kamu masih punya banyak halaman yang belum ditulis.
+                Masih ada banyak tempat yang belum kamu datangi,
+                banyak tujuan yang belum kamu capai, banyak hal baik
+                yang mungkin sedang berjalan menuju hidupmu tanpa kamu sadari.
+              </p>
+
+              <p>
+                Teruslah menjadi seseorang yang punya hati baik.
+                Teruslah bekerja untuk masa depanmu.
+                Teruslah percaya bahwa proses yang panjang tetap memiliki
+                tujuan. Dan ketika suatu saat kamu merasa ragu,
+                semoga kamu mengingat bahwa ada seseorang yang dari jauh
+                tetap mendoakanmu.
+              </p>
+
+              <p>
+                Terima kasih sudah menjadi bagian dari cerita hidupku.
+                Terima kasih untuk setiap percakapan, setiap kabar,
+                setiap perhatian kecil, setiap tawa, dan setiap momen
+                sederhana yang pernah membuat hari terasa lebih baik.
+              </p>
+
+              <p>
+                Semoga tahun baru dalam hidupmu membawa lebih banyak alasan
+                untuk tersenyum. Semoga langkahmu dilindungi, pekerjaanmu
+                dimudahkan, impianmu semakin dekat, dan hatimu selalu
+                menemukan tempat untuk beristirahat.
+              </p>
+
+              <p>
+                Dan kalau suatu hari nanti kamu melihat kembali hadiah kecil
+                ini, aku harap kamu tidak hanya mengingat tanggal ulang tahunmu.
+                Aku harap kamu mengingat bahwa pada satu malam, dari tempat
+                yang jauh, ada seseorang yang sengaja membuat semua ini
+                hanya untuk mengatakan:
+              </p>
+
+              <p class="letter-highlight">
+                kamu berharga, kamu pantas mendapatkan hal-hal baik,
+                dan aku selalu ingin melihatmu baik-baik saja.
+              </p>
+
+              <p>
+                Selamat bertambah satu perjalanan, Aa.
+                Semoga langkah berikutnya menjadi salah satu perjalanan
+                terbaik dalam hidupmu.
+              </p>
+
+              <div class="letter-signature">
+                <span>Dengan seluruh doa baikku,</span>
+                <strong>— Aku, kekasihmu.</strong>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- CAKE -->
+      <section id="cake" class="section cake-section">
+        <div class="container">
+          <div class="section-heading centered reveal">
+            <span class="eyebrow">07 — MAKE A WISH</span>
+            <h2>A little cake<br><em>for your day.</em></h2>
+            <p>
+              Tidak ada pesta besar di sini. Hanya satu kue kecil,
+              satu lilin, dan satu kesempatan untuk membuat harapan.
+            </p>
+          </div>
+
+          <div class="cake-stage reveal">
+            <div class="cake-light"></div>
+
+            <div class="cake">
+              <div class="cake-candle">
+                <div class="flame" id="flame">
+                  <span></span>
+                </div>
+                <div class="candle-body"></div>
+              </div>
+
+              <div class="cake-top">
+                <div class="frosting-drip d1"></div>
+                <div class="frosting-drip d2"></div>
+                <div class="frosting-drip d3"></div>
+                <div class="frosting-drip d4"></div>
+              </div>
+
+              <div class="cake-layer layer-top"></div>
+              <div class="cake-layer layer-middle"></div>
+              <div class="cake-layer layer-bottom"></div>
+
+              <div class="cake-plate"></div>
+            </div>
+
+            <div id="smoke" class="smoke">
+              <span></span><span></span><span></span>
+            </div>
+
+            <button id="blowCandleBtn" class="btn btn-primary">
+              Make a Wish
+            </button>
+
+            <p id="candleMessage" class="cake-message">
+              Pejamkan mata sebentar. Pikirkan sesuatu yang kamu inginkan.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- WISH -->
+      <section id="wish" class="section wish-section">
+        <div class="container">
+          <div class="section-heading centered reveal">
+            <span class="eyebrow">08 — YOUR WISH</span>
+            <h2>Put your wish<br><em>into the night.</em></h2>
+            <p>
+              Tulis satu harapan kecil. Tidak harus sempurna.
+              Cukup sesuatu yang benar-benar ingin kamu wujudkan.
+            </p>
+          </div>
+
+          <div class="wish-box reveal">
+            <textarea id="wishInput" maxlength="180" placeholder="Write your wish..."></textarea>
+            <div class="wish-footer">
+              <span id="wishCount">0 / 180</span>
+              <button id="wishBtn" class="btn btn-primary">Make My Wish</button>
+            </div>
+          </div>
+
+          <div id="wishSky" class="wish-sky">
+            <div class="wish-stars"></div>
+            <div id="wishObject" class="wish-object"></div>
+          </div>
+
+          <p id="wishResult" class="wish-result">
+            Semoga doa yang kamu titipkan hari ini menemukan jalannya
+            untuk menjadi nyata.
+          </p>
+        </div>
+      </section>
+
+      <!-- LOVE -->
+      <section id="love" class="section love-section">
+        <div class="container">
+          <div class="section-heading centered reveal">
+            <span class="eyebrow">09 — MADE OF LITTLE THINGS</span>
+            <h2>A heart,<br><em>from a thousand threads.</em></h2>
+            <p>
+              Karena rasa sayang tidak selalu datang dalam bentuk yang besar.
+              Kadang ia terbentuk dari banyak hal kecil yang terus terhubung.
+            </p>
+          </div>
+
+          <div class="heart-stage reveal">
+            <canvas id="heartCanvas"></canvas>
+            <div class="heart-center">
+              <span>FOR</span>
+              <strong>AA</strong>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- GAMES -->
+      <section id="games" class="section games-section">
+        <div class="container">
+          <div class="section-heading reveal">
+            <span class="eyebrow">10 — A LITTLE PLAYFUL MOMENT</span>
+            <h2>Three little<br><em>challenges.</em></h2>
+            <p>
+              Sedikit permainan untuk membuat perjalanan ini tidak terlalu serius.
+              Semuanya dibuat sederhana, ringan, dan mudah dimainkan dari smartphone.
+            </p>
+          </div>
+
+          <div class="games-grid">
+
+            <!-- MATH -->
+            <article class="game-card glass-card reveal">
+              <div class="game-head">
+                <span class="game-tag">GAME 01</span>
+                <h3>Little Math Challenge</h3>
+                <p>Easy arithmetic. No pressure.</p>
+              </div>
+
+              <div id="mathGame" class="game-body">
+                <div class="game-progress">
+                  <span id="mathProgress">1 / 5</span>
+                  <span>Score <b id="mathScore">0</b></span>
+                </div>
+
+                <div class="math-question" id="mathQuestion">7 + 8 = ?</div>
+
+                <div id="mathOptions" class="answer-grid"></div>
+
+                <div id="mathFeedback" class="game-feedback"></div>
+
+                <button id="mathNext" class="btn btn-secondary hidden">
+                  Next Question
+                </button>
+
+                <div id="mathResult" class="game-result hidden"></div>
+                <button id="mathRestart" class="btn btn-primary hidden">Play Again</button>
+              </div>
+            </article>
+
+            <!-- STAR RUN -->
+            <article class="game-card glass-card reveal">
+              <div class="game-head">
+                <span class="game-tag">GAME 02</span>
+                <h3>Star Run</h3>
+                <p>Collect the stars. Avoid the blocks.</p>
+              </div>
+
+              <div class="star-game">
+                <div class="star-hud">
+                  <span>Score <b id="starScore">0</b></span>
+                  <span>Best <b id="starBest">0</b></span>
+                </div>
+
+                <canvas id="starCanvas" width="720" height="420"></canvas>
+
+                <div id="starOverlay" class="star-overlay">
+                  <h4>Ready?</h4>
+                  <p>Tap the screen to jump.</p>
+                  <button id="starStart" class="btn btn-primary">Start Run</button>
+                </div>
+
+                <div class="star-controls">
+                  <button id="starJump" class="btn btn-secondary">Tap to Jump</button>
+                </div>
+              </div>
+            </article>
+
+            <!-- ENGLISH -->
+            <article class="game-card glass-card reveal">
+              <div class="game-head">
+                <span class="game-tag">GAME 03</span>
+                <h3>Little English Challenge</h3>
+                <p>Simple words. Quick answers.</p>
+              </div>
+
+              <div id="englishGame" class="game-body">
+                <div class="game-progress">
+                  <span id="englishProgress">1 / 5</span>
+                  <span>Score <b id="englishScore">0</b></span>
+                </div>
+
+                <div class="english-question" id="englishQuestion">
+                  What is the opposite of "big"?
+                </div>
+
+                <div id="englishOptions" class="answer-grid"></div>
+
+                <div id="englishFeedback" class="game-feedback"></div>
+
+                <button id="englishNext" class="btn btn-secondary hidden">
+                  Next Question
+                </button>
+
+                <div id="englishResult" class="game-result hidden"></div>
+                <button id="englishRestart" class="btn btn-primary hidden">Play Again</button>
+              </div>
+            </article>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- SURPRISE -->
+      <section id="surprise" class="section surprise-section">
+        <div class="surprise-stars"></div>
+
+        <div class="container surprise-container">
+          <div id="surpriseBefore" class="surprise-before reveal">
+            <span class="eyebrow">THE LAST PAGE</span>
+            <h2>There is still<br><em>one more thing.</em></h2>
+            <p>
+              Jangan buru-buru pergi.
+              Hadiah kecil ini belum benar-benar selesai.
+            </p>
+
+            <button id="surpriseBtn" class="btn btn-primary">
+              Open the Surprise
+            </button>
+          </div>
+
+          <div id="surpriseReveal" class="surprise-reveal">
+            <div class="reveal-glow"></div>
+
+            <span class="eyebrow">FOR YOU, AA</span>
+
+            <h2>
+              Happy Birthday,<br>
+              <em>Gilang.</em>
+            </h2>
+
+            <div class="surprise-line"></div>
+
+            <p>
+              Semoga langkahmu di perjalanan yang baru selalu dipenuhi
+              hal-hal baik, orang-orang baik, dan alasan-alasan baru
+              untuk terus tersenyum.
+            </p>
+
+            <p>
+              Di mana pun kamu berada, semoga kamu selalu tahu bahwa
+              ada seseorang yang tetap mendoakanmu dari jauh.
+              Seseorang yang ingin melihatmu sehat, tenang,
+              berhasil mencapai tujuanmu, dan tetap menjadi dirimu sendiri.
+            </p>
+
+            <p>
+              Semoga pekerjaanmu dimudahkan.
+              Semoga setiap lelahmu mempunyai arti.
+              Semoga setiap usaha yang kamu lakukan perlahan membawa
+              kamu lebih dekat kepada kehidupan yang kamu impikan.
+            </p>
+
+            <p>
+              Dan semoga ketika dunia terasa terlalu ramai,
+              kamu masih punya satu tempat kecil untuk mengingat
+              bahwa kamu dicintai, dihargai, dan dirayakan.
+            </p>
+
+            <strong class="final-line">
+              Selamat ulang tahun, Aa.<br>
+              Terima kasih sudah menjadi kamu.
+            </strong>
+
+            <span class="final-signature">— Aku, kekasihmu.</span>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <nav id="bottomNav" class="bottom-nav" aria-label="Main navigation">
+      <a href="#home" data-section="home">Home</a>
+      <a href="#gift" data-section="gift">Gift</a>
+      <a href="#story" data-section="story">Story</a>
+      <a href="#memories" data-section="memories">Memories</a>
+      <a href="#letter" data-section="letter">Letter</a>
+      <a href="#cake" data-section="cake">Cake</a>
+      <a href="#wish" data-section="wish">Wish</a>
+      <a href="#love" data-section="love">Love</a>
+      <a href="#games" data-section="games">Games</a>
+      <a href="#surprise" data-section="surprise">Surprise</a>
+    </nav>
+
+    <div id="toast" class="toast" role="status"></div>
+
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
