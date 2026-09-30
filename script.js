@@ -9,6 +9,9 @@ const App = {
   init() {
     Loader.init();
     Navigation.init();
+    PinGate.init();
+    PageNavigator.init();
+    Decorations.init();
     AudioManager.init();
     Opening.init();
     Reveal.init();
@@ -106,16 +109,18 @@ const Opening = {
     if (!opening || !button) return;
 
     const open = async () => {
+      if (!PinGate.unlocked) {
+        Toast.show("Masukin PIN dulu ya.");
+        return;
+      }
+
       opening.classList.add("closed");
       document.body.classList.remove("locked");
 
       await AudioManager.tryPlay();
 
       setTimeout(() => {
-        window.scrollTo({
-          top: 0,
-          behavior: "instant"
-        });
+        window.scrollTo({ top: 0, behavior: "instant" });
       }, 50);
     };
 
@@ -135,22 +140,14 @@ const Navigation = {
 
   init() {
     this.links = Utils.$$(".bottom-nav a");
-
     this.sections = this.links
-      .map(link =>
-        document.getElementById(
-          link.dataset.section
-        )
-      )
+      .map(link => document.getElementById(link.dataset.section))
       .filter(Boolean);
 
     this.links.forEach(link => {
       link.addEventListener("click", event => {
-        const id =
-          link.dataset.section;
-
-        const section =
-          document.getElementById(id);
+        const id = link.dataset.section;
+        const section = document.getElementById(id);
 
         if (!section) return;
 
@@ -167,33 +164,23 @@ const Navigation = {
   },
 
   observe() {
-    const observer =
-      new IntersectionObserver(
-        entries => {
-          entries.forEach(entry => {
-            if (!entry.isIntersecting)
-              return;
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
 
-            this.links.forEach(link => {
-              link.classList.toggle(
-                "active",
-                link.dataset.section ===
-                  entry.target.id
-              );
-            });
-          });
-        },
-        {
-          rootMargin:
-            "-35% 0px -50% 0px",
-          threshold: 0
-        }
-      );
+        this.links.forEach(link => {
+          link.classList.toggle(
+            "active",
+            link.dataset.section === entry.target.id
+          );
+        });
+      });
+    }, {
+      rootMargin: "-35% 0px -50% 0px",
+      threshold: 0
+    });
 
-    this.sections.forEach(
-      section =>
-        observer.observe(section)
-    );
+    this.sections.forEach(section => observer.observe(section));
   }
 };
 
@@ -207,69 +194,37 @@ const AudioManager = {
   isPlaying: false,
 
   init() {
-    this.audio =
-      Utils.$("#bgMusic");
+    this.audio = Utils.$("#bgMusic");
+    this.toggle = Utils.$("#musicToggle");
 
-    this.toggle =
-      Utils.$("#musicToggle");
-
-    if (!this.audio || !this.toggle)
-      return;
+    if (!this.audio || !this.toggle) return;
 
     this.audio.volume = 0.55;
 
-    this.toggle.addEventListener(
-      "click",
-      () => {
-        if (this.isPlaying) {
-          this.pause();
-        } else {
-          this.play();
-        }
+    this.toggle.addEventListener("click", () => {
+      if (this.isPlaying) {
+        this.pause();
+      } else {
+        this.play();
       }
-    );
+    });
 
-    this.audio.addEventListener(
-      "play",
-      () => {
-        this.isPlaying = true;
+    this.audio.addEventListener("play", () => {
+      this.isPlaying = true;
+      this.toggle.classList.add("playing");
+      this.toggle.setAttribute("aria-label", "Pause music");
+    });
 
-        this.toggle.classList.add(
-          "playing"
-        );
+    this.audio.addEventListener("pause", () => {
+      this.isPlaying = false;
+      this.toggle.classList.remove("playing");
+      this.toggle.setAttribute("aria-label", "Play music");
+    });
 
-        this.toggle.setAttribute(
-          "aria-label",
-          "Pause music"
-        );
-      }
-    );
-
-    this.audio.addEventListener(
-      "pause",
-      () => {
-        this.isPlaying = false;
-
-        this.toggle.classList.remove(
-          "playing"
-        );
-
-        this.toggle.setAttribute(
-          "aria-label",
-          "Play music"
-        );
-      }
-    );
-
-    this.audio.addEventListener(
-      "error",
-      () => {
-        this.toggle.style.opacity =
-          ".5";
-
-        this.toggle.disabled = true;
-      }
-    );
+    this.audio.addEventListener("error", () => {
+      this.toggle.style.opacity = ".5";
+      this.toggle.disabled = true;
+    });
   },
 
   async tryPlay() {
@@ -295,9 +250,7 @@ const AudioManager = {
   },
 
   showMusicHint() {
-    Toast.show(
-      "Tap tombol musik jika ingin memulai lagu."
-    );
+    Toast.show("Tap tombol musik jika ingin memulai lagu.");
   }
 };
 
@@ -309,21 +262,16 @@ const Toast = {
   timer: null,
 
   show(message) {
-    const toast =
-      Utils.$("#toast");
-
+    const toast = Utils.$("#toast");
     if (!toast) return;
 
     toast.textContent = message;
-
     toast.classList.add("show");
 
     clearTimeout(this.timer);
 
     this.timer = setTimeout(() => {
-      toast.classList.remove(
-        "show"
-      );
+      toast.classList.remove("show");
     }, 2600);
   }
 };
@@ -334,37 +282,22 @@ const Toast = {
 
 const Reveal = {
   init() {
-    const elements =
-      Utils.$$(".reveal");
+    const elements = Utils.$$(".reveal");
 
     if (!elements.length) return;
 
-    const observer =
-      new IntersectionObserver(
-        entries => {
-          entries.forEach(entry => {
-            if (
-              entry.isIntersecting
-            ) {
-              entry.target.classList.add(
-                "visible"
-              );
-
-              observer.unobserve(
-                entry.target
-              );
-            }
-          });
-        },
-        {
-          threshold: 0.12
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("visible");
+          observer.unobserve(entry.target);
         }
-      );
+      });
+    }, {
+      threshold: 0.12
+    });
 
-    elements.forEach(
-      el =>
-        observer.observe(el)
-    );
+    elements.forEach(el => observer.observe(el));
   }
 };
 
@@ -381,162 +314,73 @@ const Ambient = {
   height: 0,
 
   init() {
-    this.canvas =
-      Utils.$("#ambientCanvas");
+    this.canvas = Utils.$("#ambientCanvas");
 
     if (!this.canvas) return;
 
-    this.ctx =
-      this.canvas.getContext(
-        "2d",
-        {
-          alpha: true
-        }
-      );
+    this.ctx = this.canvas.getContext("2d", {
+      alpha: true
+    });
 
     if (!this.ctx) return;
 
     this.resize();
     this.createParticles();
 
-    window.addEventListener(
-      "resize",
-      () => {
-        this.resize();
-        this.createParticles();
-      },
-      {
-        passive: true
-      }
-    );
+    window.addEventListener("resize", () => {
+      this.resize();
+      this.createParticles();
+    }, { passive: true });
 
     this.animate();
   },
 
   resize() {
-    const dpr =
-      Math.min(
-        window.devicePixelRatio ||
-          1,
-        2
-      );
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
-    this.width =
-      window.innerWidth;
+    this.width = window.innerWidth;
+    this.height = window.innerHeight;
 
-    this.height =
-      window.innerHeight;
+    this.canvas.width = this.width * dpr;
+    this.canvas.height = this.height * dpr;
+    this.canvas.style.width = `${this.width}px`;
+    this.canvas.style.height = `${this.height}px`;
 
-    this.canvas.width =
-      this.width * dpr;
-
-    this.canvas.height =
-      this.height * dpr;
-
-    this.canvas.style.width =
-      `${this.width}px`;
-
-    this.canvas.style.height =
-      `${this.height}px`;
-
-    this.ctx.setTransform(
-      dpr,
-      0,
-      0,
-      dpr,
-      0,
-      0
-    );
+    this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   },
 
   createParticles() {
-    const count =
-      window.innerWidth < 600
-        ? 30
-        : 55;
+    const count = window.innerWidth < 600 ? 30 : 55;
 
-    this.particles =
-      Array.from(
-        {
-          length: count
-        },
-        () => ({
-          x:
-            Math.random() *
-            this.width,
-
-          y:
-            Math.random() *
-            this.height,
-
-          radius:
-            Math.random() *
-              1.5 +
-            .3,
-
-          speed:
-            Math.random() *
-              .18 +
-            .04,
-
-          alpha:
-            Math.random() *
-              .35 +
-            .08,
-
-          phase:
-            Math.random() *
-            Math.PI *
-            2
-        })
-      );
+    this.particles = Array.from({ length: count }, () => ({
+      x: Math.random() * this.width,
+      y: Math.random() * this.height,
+      radius: Math.random() * 1.5 + .3,
+      speed: Math.random() * .18 + .04,
+      alpha: Math.random() * .35 + .08,
+      phase: Math.random() * Math.PI * 2
+    }));
   },
 
   animate() {
     if (!this.ctx) return;
 
-    const reduced =
-      window.matchMedia(
-        "(prefers-reduced-motion: reduce)"
-      ).matches;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    this.ctx.clearRect(
-      0,
-      0,
-      this.width,
-      this.height
-    );
+    this.ctx.clearRect(0, 0, this.width, this.height);
 
     if (!reduced) {
-      for (
-        const particle of
-        this.particles
-      ) {
-        particle.y -=
-          particle.speed;
+      for (const particle of this.particles) {
+        particle.y -= particle.speed;
 
-        if (
-          particle.y < -10
-        ) {
-          particle.y =
-            this.height +
-            10;
-
-          particle.x =
-            Math.random() *
-            this.width;
+        if (particle.y < -10) {
+          particle.y = this.height + 10;
+          particle.x = Math.random() * this.width;
         }
 
-        const pulse =
-          Math.sin(
-            performance.now() *
-              .001 +
-              particle.phase
-          ) *
-          .15;
+        const pulse = Math.sin(performance.now() * .001 + particle.phase) * .15;
 
         this.ctx.beginPath();
-
         this.ctx.arc(
           particle.x,
           particle.y,
@@ -545,22 +389,12 @@ const Ambient = {
           Math.PI * 2
         );
 
-        this.ctx.fillStyle =
-          `rgba(180,210,245,${Math.max(
-            .02,
-            particle.alpha +
-              pulse
-          )})`;
-
+        this.ctx.fillStyle = `rgba(180,210,245,${Math.max(.02, particle.alpha + pulse)})`;
         this.ctx.fill();
       }
     }
 
-    this.animation =
-      requestAnimationFrame(
-        () =>
-          this.animate()
-      );
+    this.animation = requestAnimationFrame(() => this.animate());
   }
 };
 
@@ -570,112 +404,52 @@ const Ambient = {
 
 const ClockManager = {
   zones: {
-    jakarta:
-      "Asia/Jakarta",
-
-    makassar:
-      "Asia/Makassar",
-
-    jayapura:
-      "Asia/Jayapura",
-
-    tokyo:
-      "Asia/Tokyo"
+    jakarta: "Asia/Jakarta",
+    makassar: "Asia/Makassar",
+    jayapura: "Asia/Jayapura",
+    tokyo: "Asia/Tokyo"
   },
 
   init() {
     this.update();
-
-    setInterval(
-      () =>
-        this.update(),
-      1000
-    );
+    setInterval(() => this.update(), 1000);
   },
 
-  formatTime(
-    date,
-    zone
-  ) {
-    return new Intl.DateTimeFormat(
-      "en-GB",
-      {
-        timeZone: zone,
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: false
-      }
-    ).format(date);
+  formatTime(date, zone) {
+    return new Intl.DateTimeFormat("en-GB", {
+      timeZone: zone,
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false
+    }).format(date);
   },
 
-  formatDate(
-    date,
-    zone
-  ) {
-    return new Intl.DateTimeFormat(
-      "en-GB",
-      {
-        timeZone: zone,
-        weekday: "long",
-        day: "2-digit",
-        month: "long",
-        year: "numeric"
-      }
-    ).format(date);
+  formatDate(date, zone) {
+    return new Intl.DateTimeFormat("en-GB", {
+      timeZone: zone,
+      weekday: "long",
+      day: "2-digit",
+      month: "long",
+      year: "numeric"
+    }).format(date);
   },
 
   update() {
-    const now =
-      new Date();
+    const now = new Date();
 
     const values = {
-      clockJakarta:
-        this.formatTime(
-          now,
-          this.zones.jakarta
-        ),
-
-      clockMakassar:
-        this.formatTime(
-          now,
-          this.zones.makassar
-        ),
-
-      clockJayapura:
-        this.formatTime(
-          now,
-          this.zones.jayapura
-        ),
-
-      clockTokyo:
-        this.formatTime(
-          now,
-          this.zones.tokyo
-        ),
-
-      clockDate:
-        this.formatDate(
-          now,
-          this.zones.tokyo
-        )
+      clockJakarta: this.formatTime(now, this.zones.jakarta),
+      clockMakassar: this.formatTime(now, this.zones.makassar),
+      clockJayapura: this.formatTime(now, this.zones.jayapura),
+      clockTokyo: this.formatTime(now, this.zones.tokyo),
+      clockDate: this.formatDate(now, this.zones.tokyo)
     };
 
-    Object.entries(
-      values
-    ).forEach(
-      ([id, value]) => {
-        const element =
-          document.getElementById(
-            id
-          );
-
-        if (element) {
-          element.textContent =
-            value;
-        }
-      }
-    );
+    Object.entries(values).forEach(([id, value]) => {
+      const element = document.getElementById(id);
+      if (element) element.textContent = value;
+    });
   }
 };
 
@@ -685,22 +459,11 @@ const ClockManager = {
 
 const GiftAnimation = {
   init() {
-    const box =
-      Utils.$("#giftBox");
+    const box = Utils.$("#giftBox");
+    const button = Utils.$("#giftOpenBtn");
+    const message = Utils.$("#giftMessage");
 
-    const button =
-      Utils.$("#giftOpenBtn");
-
-    const message =
-      Utils.$("#giftMessage");
-
-    if (
-      !box ||
-      !button ||
-      !message
-    ) {
-      return;
-    }
+    if (!box || !button || !message) return;
 
     let opened = false;
 
@@ -708,50 +471,25 @@ const GiftAnimation = {
       if (opened) return;
 
       opened = true;
-
-      box.classList.add(
-        "open"
-      );
-
-      button.textContent =
-        "Gift Opened";
-
+      box.classList.add("open");
+      button.textContent = "Gift Opened";
       button.disabled = true;
 
-      setTimeout(
-        () => {
-          message.classList.add(
-            "show"
-          );
-        },
-        550
-      );
+      setTimeout(() => {
+        message.classList.add("show");
+      }, 550);
     };
 
-    box.addEventListener(
-      "click",
-      open
-    );
+    box.addEventListener("click", open);
 
-    box.addEventListener(
-      "keydown",
-      event => {
-        if (
-          event.key ===
-            "Enter" ||
-          event.key ===
-            " "
-        ) {
-          event.preventDefault();
-          open();
-        }
+    box.addEventListener("keydown", event => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        open();
       }
-    );
+    });
 
-    button.addEventListener(
-      "click",
-      open
-    );
+    button.addEventListener("click", open);
   }
 };
 
@@ -767,110 +505,48 @@ const Gallery = {
   endX: 0,
 
   init() {
-    this.cards =
-      Utils.$$(".photo-card");
+    this.cards = Utils.$$(".photo-card");
 
-    if (!this.cards.length)
-      return;
+    if (!this.cards.length) return;
 
-    const dotsContainer =
-      Utils.$("#galleryDots");
+    const dotsContainer = Utils.$("#galleryDots");
 
-    this.cards.forEach(
-      (_, index) => {
-        const dot =
-          document.createElement(
-            "button"
-          );
+    this.cards.forEach((_, index) => {
+      const dot = document.createElement("button");
 
-        dot.type = "button";
+      dot.type = "button";
+      dot.setAttribute("aria-label", `Go to photo ${index + 1}`);
 
-        dot.setAttribute(
-          "aria-label",
-          `Go to photo ${
-            index + 1
-          }`
-        );
+      dot.addEventListener("click", () => {
+        this.goTo(index);
+      });
 
-        dot.addEventListener(
-          "click",
-          () => {
-            this.goTo(index);
-          }
-        );
+      dotsContainer?.appendChild(dot);
+    });
 
-        dotsContainer?.appendChild(
-          dot
-        );
-      }
-    );
+    this.dots = dotsContainer ? Utils.$$("button", dotsContainer) : [];
 
-    this.dots =
-      dotsContainer
-        ? Utils.$$(
-            "button",
-            dotsContainer
-          )
-        : [];
+    Utils.$(".gallery-prev")?.addEventListener("click", () => this.prev());
+    Utils.$(".gallery-next")?.addEventListener("click", () => this.next());
 
-    Utils.$(
-      ".gallery-prev"
-    )?.addEventListener(
-      "click",
-      () => this.prev()
-    );
+    const gallery = Utils.$("#gallery");
 
-    Utils.$(
-      ".gallery-next"
-    )?.addEventListener(
-      "click",
-      () => this.next()
-    );
+    gallery?.addEventListener("touchstart", event => {
+      this.startX = event.changedTouches[0].screenX;
+    }, { passive: true });
 
-    const gallery =
-      Utils.$("#gallery");
-
-    gallery?.addEventListener(
-      "touchstart",
-      event => {
-        this.startX =
-          event.changedTouches[
-            0
-          ].screenX;
-      },
-      {
-        passive: true
-      }
-    );
-
-    gallery?.addEventListener(
-      "touchend",
-      event => {
-        this.endX =
-          event.changedTouches[
-            0
-          ].screenX;
-
-        this.handleSwipe();
-      },
-      {
-        passive: true
-      }
-    );
+    gallery?.addEventListener("touchend", event => {
+      this.endX = event.changedTouches[0].screenX;
+      this.handleSwipe();
+    }, { passive: true });
 
     this.render();
   },
 
   handleSwipe() {
-    const diff =
-      this.startX -
-      this.endX;
+    const diff = this.startX - this.endX;
 
-    if (
-      Math.abs(diff) < 40
-    ) {
-      return;
-    }
+    if (Math.abs(diff) < 40) return;
 
     if (diff > 0) {
       this.next();
@@ -880,19 +556,12 @@ const Gallery = {
   },
 
   next() {
-    this.index =
-      (this.index + 1) %
-      this.cards.length;
-
+    this.index = (this.index + 1) % this.cards.length;
     this.render();
   },
 
   prev() {
-    this.index =
-      (this.index - 1 +
-        this.cards.length) %
-      this.cards.length;
-
+    this.index = (this.index - 1 + this.cards.length) % this.cards.length;
     this.render();
   },
 
@@ -902,25 +571,13 @@ const Gallery = {
   },
 
   render() {
-    this.cards.forEach(
-      (card, index) => {
-        card.classList.toggle(
-          "active",
-          index ===
-            this.index
-        );
-      }
-    );
+    this.cards.forEach((card, index) => {
+      card.classList.toggle("active", index === this.index);
+    });
 
-    this.dots.forEach(
-      (dot, index) => {
-        dot.classList.toggle(
-          "active",
-          index ===
-            this.index
-        );
-      }
-    );
+    this.dots.forEach((dot, index) => {
+      dot.classList.toggle("active", index === this.index);
+    });
   }
 };
 
@@ -932,91 +589,45 @@ const Cake = {
   blown: false,
 
   init() {
-    const button =
-      Utils.$(
-        "#blowCandleBtn"
-      );
+    const button = Utils.$("#blowCandleBtn");
+    const flame = Utils.$("#flame");
+    const smoke = Utils.$("#smoke");
+    const message = Utils.$("#candleMessage");
 
-    const flame =
-      Utils.$("#flame");
+    if (!button || !flame || !smoke || !message) return;
 
-    const smoke =
-      Utils.$("#smoke");
-
-    const message =
-      Utils.$(
-        "#candleMessage"
-      );
-
-    if (
-      !button ||
-      !flame ||
-      !smoke ||
-      !message
-    ) {
-      return;
-    }
-
-    button.addEventListener(
-      "click",
-      () => {
-        if (this.blown) {
-          this.reset();
-          return;
-        }
-
-        this.blown = true;
-
-        flame.classList.add(
-          "off"
-        );
-
-        smoke.classList.add(
-          "active"
-        );
-
-        button.textContent =
-          "Light Again";
-
-        message.textContent =
-          "Harapan sudah dibuat. Sekarang biarkan waktu membantu menemukan jalannya.";
-
-        Toast.show(
-          "Wish locked in."
-        );
+    button.addEventListener("click", () => {
+      if (this.blown) {
+        this.reset();
+        return;
       }
-    );
+
+      this.blown = true;
+
+      flame.classList.add("off");
+      smoke.classList.add("active");
+
+      button.textContent = "Light Again";
+
+      message.textContent =
+        "Harapan sudah dibuat. Sekarang biarkan waktu membantu menemukan jalannya.";
+
+      Toast.show("Wish locked in.");
+    });
   },
 
   reset() {
-    const flame =
-      Utils.$("#flame");
-
-    const smoke =
-      Utils.$("#smoke");
-
-    const button =
-      Utils.$(
-        "#blowCandleBtn"
-      );
-
-    const message =
-      Utils.$(
-        "#candleMessage"
-      );
+    const flame = Utils.$("#flame");
+    const smoke = Utils.$("#smoke");
+    const button = Utils.$("#blowCandleBtn");
+    const message = Utils.$("#candleMessage");
 
     this.blown = false;
 
-    flame.classList.remove(
-      "off"
-    );
+    flame.classList.remove("off");
+    smoke.classList.remove("active");
 
-    smoke.classList.remove(
-      "active"
-    );
-
-    button.textContent =
-      "Make a Wish";
+    button.textContent = "Make a Wish";
 
     message.textContent =
       "Pejamkan mata sebentar. Pikirkan sesuatu yang kamu inginkan.";
@@ -1029,82 +640,42 @@ const Cake = {
 
 const Wish = {
   init() {
-    const input =
-      Utils.$("#wishInput");
+    const input = Utils.$("#wishInput");
+    const count = Utils.$("#wishCount");
+    const button = Utils.$("#wishBtn");
+    const object = Utils.$("#wishObject");
+    const result = Utils.$("#wishResult");
 
-    const count =
-      Utils.$("#wishCount");
+    if (!input || !count || !button || !object) return;
 
-    const button =
-      Utils.$("#wishBtn");
+    input.addEventListener("input", () => {
+      count.textContent = `${input.value.length} / 180`;
+    });
 
-    const object =
-      Utils.$("#wishObject");
+    button.addEventListener("click", () => {
+      const value = input.value.trim();
 
-    const result =
-      Utils.$("#wishResult");
-
-    if (
-      !input ||
-      !count ||
-      !button ||
-      !object
-    ) {
-      return;
-    }
-
-    input.addEventListener(
-      "input",
-      () => {
-        count.textContent =
-          `${input.value.length} / 180`;
+      if (!value) {
+        Toast.show("Tulis satu wish terlebih dahulu.");
+        input.focus();
+        return;
       }
-    );
 
-    button.addEventListener(
-      "click",
-      () => {
-        const value =
-          input.value.trim();
+      object.textContent = value;
 
-        if (!value) {
-          Toast.show(
-            "Tulis satu wish terlebih dahulu."
-          );
+      object.classList.remove("fly");
 
-          input.focus();
+      void object.offsetWidth;
 
-          return;
-        }
+      object.classList.add("fly");
 
-        object.textContent =
-          value;
+      result.style.opacity = "1";
 
-        object.classList.remove(
-          "fly"
-        );
+      input.value = "";
+      count.textContent = "0 / 180";
 
-        void object.offsetWidth;
-
-        object.classList.add(
-          "fly"
-        );
-
-        if (result) {
-          result.style.opacity =
-            "1";
-        }
-
-        input.value = "";
-
-        count.textContent =
-          "0 / 180";
-
-        Toast.show(
-          "Your wish is on its way."
-        );
-      }
-    );
+      Toast.show("Your wish is on its way.");
+    });
   }
 };
 
@@ -1124,150 +695,64 @@ const LoveAnimation = {
   started: false,
 
   init() {
-    this.canvas =
-      Utils.$(
-        "#heartCanvas"
-      );
+    this.canvas = Utils.$("#heartCanvas");
 
-    if (!this.canvas)
-      return;
+    if (!this.canvas) return;
 
-    this.ctx =
-      this.canvas.getContext(
-        "2d"
-      );
+    this.ctx = this.canvas.getContext("2d");
 
-    if (!this.ctx)
-      return;
+    if (!this.ctx) return;
 
     this.resize();
     this.createHeart();
 
-    window.addEventListener(
-      "resize",
-      () => {
-        this.resize();
-        this.createHeart();
-      },
-      {
-        passive: true
+    window.addEventListener("resize", () => {
+      this.resize();
+      this.createHeart();
+    }, { passive: true });
+
+    const section = Utils.$("#love");
+
+    const observer = new IntersectionObserver(entries => {
+      if (entries.some(entry => entry.isIntersecting)) {
+        this.started = true;
+        observer.disconnect();
       }
-    );
+    }, { threshold: .15 });
 
-    const section =
-      Utils.$("#love");
-
-    const observer =
-      new IntersectionObserver(
-        entries => {
-          if (
-            entries.some(
-              entry =>
-                entry.isIntersecting
-            )
-          ) {
-            this.started = true;
-            observer.disconnect();
-          }
-        },
-        {
-          threshold: .15
-        }
-      );
-
-    if (section) {
-      observer.observe(
-        section
-      );
-    }
+    section && observer.observe(section);
 
     this.animate();
   },
 
   resize() {
-    const rect =
-      this.canvas.getBoundingClientRect();
+    const rect = this.canvas.getBoundingClientRect();
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
-    const dpr =
-      Math.min(
-        window.devicePixelRatio ||
-          1,
-        2
-      );
+    this.width = Math.max(rect.width, 300);
+    this.height = Math.max(rect.height, 350);
 
-    this.width =
-      Math.max(
-        rect.width,
-        300
-      );
+    this.canvas.width = this.width * dpr;
+    this.canvas.height = this.height * dpr;
 
-    this.height =
-      Math.max(
-        rect.height,
-        350
-      );
-
-    this.canvas.width =
-      this.width * dpr;
-
-    this.canvas.height =
-      this.height * dpr;
-
-    this.ctx.setTransform(
-      dpr,
-      0,
-      0,
-      dpr,
-      0,
-      0
-    );
+    this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   },
 
   createHeart() {
     const points = [];
+    const count = window.innerWidth < 600 ? 230 : 360;
 
-    const count =
-      window.innerWidth < 600
-        ? 230
-        : 360;
+    for (let i = 0; i < count; i++) {
+      const t = Math.random() * Math.PI * 2;
 
-    for (
-      let i = 0;
-      i < count;
-      i++
-    ) {
-      const t =
-        Math.random() *
-        Math.PI *
-        2;
-
-      const x =
-        16 *
-        Math.pow(
-          Math.sin(t),
-          3
-        );
-
+      const x = 16 * Math.pow(Math.sin(t), 3);
       const y =
-        13 *
-          Math.cos(t) -
-        5 *
-          Math.cos(
-            2 * t
-          ) -
-        2 *
-          Math.cos(
-            3 * t
-          ) -
-        Math.cos(
-          4 * t
-        );
+        13 * Math.cos(t) -
+        5 * Math.cos(2 * t) -
+        2 * Math.cos(3 * t) -
+        Math.cos(4 * t);
 
-      const depth =
-        Utils.random(
-          -5,
-          5
-        );
+      const depth = Utils.random(-5, 5);
 
       points.push({
         x,
@@ -1276,304 +761,122 @@ const LoveAnimation = {
       });
     }
 
-    this.targetPoints =
-      points;
+    this.targetPoints = points;
 
-    this.particles =
-      points.map(
-        point => ({
-          x: Utils.random(
-            -20,
-            20
-          ),
-
-          y: Utils.random(
-            -20,
-            20
-          ),
-
-          z: Utils.random(
-            -10,
-            10
-          ),
-
-          target: point,
-
-          progress:
-            Math.random()
-        })
-      );
+    this.particles = points.map(point => ({
+      x: Utils.random(-20, 20),
+      y: Utils.random(-20, 20),
+      z: Utils.random(-10, 10),
+      target: point,
+      progress: Math.random()
+    }));
 
     this.lines = [];
 
-    for (
-      let i = 0;
-      i <
-        this.particles.length;
-      i++
-    ) {
+    for (let i = 0; i < this.particles.length; i++) {
       const nearest = [];
 
-      for (
-        let j = 0;
-        j <
-          this.particles.length;
-        j++
-      ) {
-        if (i === j)
-          continue;
+      for (let j = 0; j < this.particles.length; j++) {
+        if (i === j) continue;
 
-        const dx =
-          this.particles[i]
-            .target.x -
-          this.particles[j]
-            .target.x;
+        const dx = this.particles[i].target.x - this.particles[j].target.x;
+        const dy = this.particles[i].target.y - this.particles[j].target.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
 
-        const dy =
-          this.particles[i]
-            .target.y -
-          this.particles[j]
-            .target.y;
-
-        const distance =
-          Math.sqrt(
-            dx * dx +
-              dy * dy
-          );
-
-        if (
-          distance < 3.3
-        ) {
-          nearest.push({
-            j,
-            distance
-          });
+        if (distance < 3.3) {
+          nearest.push({ j, distance });
         }
       }
 
       nearest
-        .sort(
-          (a, b) =>
-            a.distance -
-            b.distance
-        )
+        .sort((a, b) => a.distance - b.distance)
         .slice(0, 2)
-        .forEach(
-          item => {
-            if (
-              i <
-              item.j
-            ) {
-              this.lines.push(
-                [
-                  i,
-                  item.j
-                ]
-              );
-            }
+        .forEach(item => {
+          if (i < item.j) {
+            this.lines.push([i, item.j]);
           }
-        );
+        });
     }
   },
 
   project(point) {
-    const scale =
-      Math.min(
-        this.width,
-        this.height
-      ) / 42;
+    const scale = Math.min(this.width, this.height) / 42;
 
-    const angle =
-      this.rotation;
+    const angle = this.rotation;
+    const cos = Math.cos(angle);
+    const sin = Math.sin(angle);
 
-    const cos =
-      Math.cos(angle);
+    const x = point.x * cos - point.z * sin;
+    const z = point.x * sin + point.z * cos;
 
-    const sin =
-      Math.sin(angle);
-
-    const x =
-      point.x * cos -
-      point.z * sin;
-
-    const z =
-      point.x * sin +
-      point.z * cos;
-
-    const perspective =
-      1 + z / 55;
+    const perspective = 1 + z / 55;
 
     return {
-      x:
-        this.width / 2 +
-        x *
-          scale *
-          perspective,
-
-      y:
-        this.height / 2 -
-        point.y *
-          scale *
-          perspective *
-          .92,
-
+      x: this.width / 2 + x * scale * perspective,
+      y: this.height / 2 - point.y * scale * perspective * .92,
       depth: z
     };
   },
 
   animate() {
-    const reduced =
-      window.matchMedia(
-        "(prefers-reduced-motion: reduce)"
-      ).matches;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    this.ctx.clearRect(
-      0,
-      0,
-      this.width,
-      this.height
-    );
+    this.ctx.clearRect(0, 0, this.width, this.height);
 
     if (this.started) {
-      this.rotation +=
-        reduced
-          ? 0
-          : .0025;
+      this.rotation += reduced ? 0 : .0025;
     }
 
-    const points =
-      this.particles.map(
-        particle => {
-          particle.progress =
-            Math.min(
-              1,
-              particle.progress +
-                .006
-            );
+    const points = this.particles.map(particle => {
+      particle.progress = Math.min(1, particle.progress + .006);
 
-          const eased =
-            1 -
-            Math.pow(
-              1 -
-                particle.progress,
-              3
-            );
+      const eased = 1 - Math.pow(1 - particle.progress, 3);
 
-          const current = {
-            x:
-              particle.x +
-              (
-                particle
-                  .target
-                  .x -
-                particle.x
-              ) *
-                eased,
+      const current = {
+        x: particle.x + (particle.target.x - particle.x) * eased,
+        y: particle.y + (particle.target.y - particle.y) * eased,
+        z: particle.z + (particle.target.z - particle.z) * eased
+      };
 
-            y:
-              particle.y +
-              (
-                particle
-                  .target
-                  .y -
-                particle.y
-              ) *
-                eased,
+      return this.project(current);
+    });
 
-            z:
-              particle.z +
-              (
-                particle
-                  .target
-                  .z -
-                particle.z
-              ) *
-                eased
-          };
+    this.lines.forEach(([a, b]) => {
+      const p1 = points[a];
+      const p2 = points[b];
 
-          return this.project(
-            current
-          );
-        }
+      if (!p1 || !p2) return;
+
+      const alpha = Math.max(
+        0,
+        Math.min(.3, .3 - Math.abs(p1.depth - p2.depth) / 50)
       );
 
-    this.lines.forEach(
-      ([a, b]) => {
-        const p1 =
-          points[a];
+      this.ctx.beginPath();
+      this.ctx.moveTo(p1.x, p1.y);
+      this.ctx.lineTo(p2.x, p2.y);
+      this.ctx.strokeStyle = `rgba(215,72,105,${alpha})`;
+      this.ctx.lineWidth = .7;
+      this.ctx.stroke();
+    });
 
-        const p2 =
-          points[b];
+    points.forEach(point => {
+      const alpha = .28 + (point.depth + 5) / 25;
 
-        if (!p1 || !p2)
-          return;
+      this.ctx.beginPath();
+      this.ctx.arc(
+        point.x,
+        point.y,
+        point.depth > 0 ? 1.35 : .8,
+        0,
+        Math.PI * 2
+      );
 
-        const alpha =
-          Math.max(
-            0,
-            Math.min(
-              .3,
-              .3 -
-                Math.abs(
-                  p1.depth -
-                    p2.depth
-                ) /
-                  50
-            )
-          );
+      this.ctx.fillStyle = `rgba(241,117,145,${alpha})`;
+      this.ctx.fill();
+    });
 
-        this.ctx.beginPath();
-
-        this.ctx.moveTo(
-          p1.x,
-          p1.y
-        );
-
-        this.ctx.lineTo(
-          p2.x,
-          p2.y
-        );
-
-        this.ctx.strokeStyle =
-          `rgba(215,72,105,${alpha})`;
-
-        this.ctx.lineWidth =
-          .7;
-
-        this.ctx.stroke();
-      }
-    );
-
-    points.forEach(
-      point => {
-        const alpha =
-          .28 +
-          (point.depth + 5) /
-            25;
-
-        this.ctx.beginPath();
-
-        this.ctx.arc(
-          point.x,
-          point.y,
-          point.depth > 0
-            ? 1.35
-            : .8,
-          0,
-          Math.PI * 2
-        );
-
-        this.ctx.fillStyle =
-          `rgba(241,117,145,${alpha})`;
-
-        this.ctx.fill();
-      }
-    );
-
-    requestAnimationFrame(
-      () =>
-        this.animate()
-    );
+    requestAnimationFrame(() => this.animate());
   }
 };
 
@@ -1582,59 +885,7 @@ const LoveAnimation = {
 ========================================================= */
 
 const MathGame = {
-  questions: [
-    {
-      q: "5 + 7 = ?",
-      options: [
-        "10",
-        "11",
-        "12",
-        "13"
-      ],
-      answer: "12"
-    },
-    {
-      q: "9 × 3 = ?",
-      options: [
-        "18",
-        "21",
-        "27",
-        "30"
-      ],
-      answer: "27"
-    },
-    {
-      q: "20 - 8 = ?",
-      options: [
-        "10",
-        "11",
-        "12",
-        "14"
-      ],
-      answer: "12"
-    },
-    {
-      q: "36 ÷ 6 = ?",
-      options: [
-        "5",
-        "6",
-        "7",
-        "8"
-      ],
-      answer: "6"
-    },
-    {
-      q: "15 + 9 = ?",
-      options: [
-        "22",
-        "23",
-        "24",
-        "25"
-      ],
-      answer: "24"
-    }
-  ],
-
+  questions: [],
   current: 0,
   score: 0,
   locked: false,
@@ -1643,281 +894,130 @@ const MathGame = {
     this.buildQuestions();
     this.render();
 
-    Utils.$(
-      "#mathNext"
-    )?.addEventListener(
-      "click",
-      () =>
-        this.next()
-    );
+    Utils.$("#mathNext")?.addEventListener("click", () => {
+      this.next();
+    });
 
-    Utils.$(
-      "#mathRestart"
-    )?.addEventListener(
-      "click",
-      () =>
-        this.restart()
-    );
+    Utils.$("#mathRestart")?.addEventListener("click", () => {
+      this.restart();
+    });
   },
 
   buildQuestions() {
-    this.questions =
-      Utils.shuffle([
-        {
-          q:
-            "5 + 7 = ?",
-          options: [
-            "10",
-            "11",
-            "12",
-            "13"
-          ],
-          answer: "12"
-        },
-        {
-          q:
-            "9 × 3 = ?",
-          options: [
-            "18",
-            "21",
-            "27",
-            "30"
-          ],
-          answer: "27"
-        },
-        {
-          q:
-            "20 - 8 = ?",
-          options: [
-            "10",
-            "11",
-            "12",
-            "14"
-          ],
-          answer: "12"
-        },
-        {
-          q:
-            "36 ÷ 6 = ?",
-          options: [
-            "5",
-            "6",
-            "7",
-            "8"
-          ],
-          answer: "6"
-        },
-        {
-          q:
-            "15 + 9 = ?",
-          options: [
-            "22",
-            "23",
-            "24",
-            "25"
-          ],
-          answer: "24"
-        },
-        {
-          q:
-            "8 × 4 = ?",
-          options: [
-            "24",
-            "28",
-            "32",
-            "36"
-          ],
-          answer: "32"
-        },
-        {
-          q:
-            "50 - 17 = ?",
-          options: [
-            "31",
-            "32",
-            "33",
-            "34"
-          ],
-          answer: "33"
-        }
-      ]).slice(
-        0,
-        5
-      );
+    this.questions = Array.from({ length: 5 }, () => {
+      const type = Utils.randomInt(0, 3);
+
+      let a;
+      let b;
+      let answer;
+      let symbol;
+
+      if (type === 0) {
+        a = Utils.randomInt(3, 18);
+        b = Utils.randomInt(2, 15);
+        answer = a + b;
+        symbol = "+";
+      } else if (type === 1) {
+        a = Utils.randomInt(8, 25);
+        b = Utils.randomInt(2, a);
+        answer = a - b;
+        symbol = "−";
+      } else if (type === 2) {
+        a = Utils.randomInt(2, 10);
+        b = Utils.randomInt(2, 9);
+        answer = a * b;
+        symbol = "×";
+      } else {
+        b = Utils.randomInt(2, 8);
+        answer = Utils.randomInt(2, 10);
+        a = b * answer;
+        symbol = "÷";
+      }
+
+      const options = new Set([answer]);
+
+      while (options.size < 4) {
+        options.add(
+          Math.max(0, answer + Utils.randomInt(-6, 6))
+        );
+      }
+
+      return {
+        question: `${a} ${symbol} ${b} = ?`,
+        answer,
+        options: Utils.shuffle([...options])
+      };
+    });
   },
 
   render() {
-    const current =
-      this.questions[
-        this.current
-      ];
+    const progress = Utils.$("#mathProgress");
+    const score = Utils.$("#mathScore");
+    const question = Utils.$("#mathQuestion");
+    const options = Utils.$("#mathOptions");
+    const feedback = Utils.$("#mathFeedback");
+    const next = Utils.$("#mathNext");
 
-    if (!current)
-      return;
+    if (!question || !options) return;
 
-    const progress =
-      Utils.$(
-        "#mathProgress"
-      );
+    const current = this.questions[this.current];
 
-    const question =
-      Utils.$(
-        "#mathQuestion"
-      );
+    progress.textContent = `${this.current + 1} / ${this.questions.length}`;
+    score.textContent = this.score;
 
-    const options =
-      Utils.$(
-        "#mathOptions"
-      );
+    question.textContent = current.question;
 
-    const feedback =
-      Utils.$(
-        "#mathFeedback"
-      );
+    options.innerHTML = "";
+    feedback.textContent = "";
+    next.classList.add("hidden");
 
-    const next =
-      Utils.$(
-        "#mathNext"
-      );
+    this.locked = false;
 
-    progress.textContent =
-      `${
-        this.current + 1
-      } / ${
-        this.questions.length
-      }`;
+    current.options.forEach(value => {
+      const button = document.createElement("button");
 
-    question.textContent =
-      current.q;
+      button.className = "answer-btn";
+      button.textContent = value;
+      button.type = "button";
 
-    options.innerHTML =
-      "";
+      button.addEventListener("click", () => {
+        this.answer(value, button);
+      });
 
-    feedback.textContent =
-      "";
-
-    next.classList.add(
-      "hidden"
-    );
-
-    this.locked =
-      false;
-
-    current.options.forEach(
-      option => {
-        const button =
-          document.createElement(
-            "button"
-          );
-
-        button.type =
-          "button";
-
-        button.className =
-          "answer-btn";
-
-        button.textContent =
-          option;
-
-        button.addEventListener(
-          "click",
-          () => {
-            this.answer(
-              option,
-              button
-            );
-          }
-        );
-
-        options.appendChild(
-          button
-        );
-      }
-    );
-
-    Utils.$(
-      "#mathScore"
-    ).textContent =
-      this.score;
+      options.appendChild(button);
+    });
   },
 
-  answer(
-    value,
-    clicked
-  ) {
-    if (this.locked)
-      return;
+  answer(value, clicked) {
+    if (this.locked) return;
 
-    this.locked =
-      true;
+    this.locked = true;
 
-    const current =
-      this.questions[
-        this.current
-      ];
+    const current = this.questions[this.current];
+    const buttons = Utils.$$(".answer-btn", Utils.$("#mathOptions"));
+    const feedback = Utils.$("#mathFeedback");
 
-    const buttons =
-      Utils.$$(
-        ".answer-btn"
-      );
+    buttons.forEach(button => {
+      button.disabled = true;
 
-    const feedback =
-      Utils.$(
-        "#mathFeedback"
-      );
-
-    buttons.forEach(
-      button => {
-        button.disabled =
-          true;
-
-        if (
-          button.textContent ===
-          current.answer
-        ) {
-          button.classList.add(
-            "correct"
-          );
-        }
+      if (Number(button.textContent) === current.answer) {
+        button.classList.add("correct");
       }
-    );
+    });
 
-    if (
-      value ===
-      current.answer
-    ) {
+    if (value === current.answer) {
       this.score++;
-
-      clicked.classList.add(
-        "correct"
-      );
-
-      feedback.textContent =
-        "Benar. Nice one.";
+      clicked.classList.add("correct");
+      feedback.textContent = "Correct. Nice one.";
     } else {
-      clicked.classList.add(
-        "wrong"
-      );
-
-      feedback.textContent =
-        `Jawabannya ${current.answer}.`;
+      clicked.classList.add("wrong");
+      feedback.textContent = `The answer was ${current.answer}.`;
     }
 
-    Utils.$(
-      "#mathScore"
-    ).textContent =
-      this.score;
+    Utils.$("#mathScore").textContent = this.score;
 
-    if (
-      this.current <
-      this.questions.length -
-        1
-    ) {
-      Utils.$(
-        "#mathNext"
-      ).classList.remove(
-        "hidden"
-      );
+    if (this.current < this.questions.length - 1) {
+      Utils.$("#mathNext").classList.remove("hidden");
     } else {
       this.finish();
     }
@@ -1926,10 +1026,7 @@ const MathGame = {
   next() {
     this.current++;
 
-    if (
-      this.current >=
-      this.questions.length
-    ) {
+    if (this.current >= this.questions.length) {
       this.finish();
       return;
     }
@@ -1938,60 +1035,27 @@ const MathGame = {
   },
 
   finish() {
-    const result =
-      Utils.$(
-        "#mathResult"
-      );
+    const result = Utils.$("#mathResult");
+    const restart = Utils.$("#mathRestart");
+    const options = Utils.$("#mathOptions");
+    const next = Utils.$("#mathNext");
 
-    const restart =
-      Utils.$(
-        "#mathRestart"
-      );
-
-    const options =
-      Utils.$(
-        "#mathOptions"
-      );
-
-    const next =
-      Utils.$(
-        "#mathNext"
-      );
-
-    next?.classList.add(
-      "hidden"
-    );
-
-    options.innerHTML =
-      "";
+    next?.classList.add("hidden");
+    options.innerHTML = "";
 
     result.textContent =
-      `Score kamu ${this.score} / ${this.questions.length}`;
+      `Final Score: ${this.score} / ${this.questions.length}`;
 
-    result.classList.remove(
-      "hidden"
-    );
-
-    restart.classList.remove(
-      "hidden"
-    );
+    result.classList.remove("hidden");
+    restart.classList.remove("hidden");
   },
 
   restart() {
     this.current = 0;
     this.score = 0;
 
-    Utils.$(
-      "#mathResult"
-    ).classList.add(
-      "hidden"
-    );
-
-    Utils.$(
-      "#mathRestart"
-    ).classList.add(
-      "hidden"
-    );
+    Utils.$("#mathResult").classList.add("hidden");
+    Utils.$("#mathRestart").classList.add("hidden");
 
     this.buildQuestions();
     this.render();
@@ -1999,571 +1063,340 @@ const MathGame = {
 };
 
 /* =========================================================
-   STAR RUN GAME
+   STAR RUN
 ========================================================= */
 
 const StarRun = {
   canvas: null,
   ctx: null,
-  animation: null,
   running: false,
-  score: 0,
+  raf: null,
+  player: null,
+  obstacles: [],
   stars: [],
-  player: {
-    x: 0,
-    y: 0,
-    size: 18
-  },
-  pointerX: 0,
+  score: 0,
+  best: 0,
+  spawnTimer: 0,
+  starTimer: 0,
   lastTime: 0,
 
   init() {
-    this.canvas =
-      Utils.$("#starCanvas");
+    this.canvas = Utils.$("#starCanvas");
 
     if (!this.canvas) return;
 
-    this.ctx =
-      this.canvas.getContext("2d");
+    this.ctx = this.canvas.getContext("2d");
 
     if (!this.ctx) return;
 
-    this.resize();
+    this.best = Number(localStorage.getItem("aaStarBest") || 0);
+    Utils.$("#starBest").textContent = this.best;
 
-    window.addEventListener(
-      "resize",
-      () => this.resize(),
-      { passive: true }
-    );
+    Utils.$("#starStart")?.addEventListener("click", () => this.start());
+    Utils.$("#starJump")?.addEventListener("click", () => this.jump());
 
-    this.bindControls();
+    this.canvas.addEventListener("pointerdown", () => {
+      if (this.running) this.jump();
+    });
 
-    Utils.$("#starStart")?.addEventListener(
-      "click",
-      () => this.start()
-    );
+    window.addEventListener("keydown", event => {
+      if (event.code === "Space" && this.running) {
+        event.preventDefault();
+        this.jump();
+      }
+    });
 
-    Utils.$("#starRestart")?.addEventListener(
-      "click",
-      () => this.start()
-    );
+    this.reset();
+  },
+
+  reset() {
+    this.player = {
+      x: 90,
+      y: 300,
+      width: 28,
+      height: 28,
+      velocityY: 0,
+      grounded: true
+    };
+
+    this.obstacles = [];
+    this.stars = [];
+    this.score = 0;
+    this.spawnTimer = 0;
+    this.starTimer = 0;
 
     this.draw();
   },
 
-  resize() {
-    const rect =
-      this.canvas.getBoundingClientRect();
-
-    const dpr =
-      Math.min(
-        window.devicePixelRatio || 1,
-        2
-      );
-
-    this.canvas.width =
-      Math.max(rect.width, 280) * dpr;
-
-    this.canvas.height =
-      Math.max(rect.height, 420) * dpr;
-
-    this.canvas.style.width =
-      `${Math.max(rect.width, 280)}px`;
-
-    this.canvas.style.height =
-      `${Math.max(rect.height, 420)}px`;
-
-    this.ctx.setTransform(
-      dpr,
-      0,
-      0,
-      dpr,
-      0,
-      0
-    );
-
-    this.player.x =
-      Math.max(rect.width, 280) / 2;
-
-    this.player.y =
-      Math.max(rect.height, 420) - 48;
-
-    this.pointerX =
-      this.player.x;
-  },
-
-  bindControls() {
-    const rect =
-      () =>
-        this.canvas.getBoundingClientRect();
-
-    const move = x => {
-      const bounds = rect();
-
-      this.pointerX =
-        Utils.clamp(
-          x - bounds.left,
-          20,
-          bounds.width - 20
-        );
-    };
-
-    this.canvas.addEventListener(
-      "pointermove",
-      event => {
-        move(event.clientX);
-      },
-      { passive: true }
-    );
-
-    this.canvas.addEventListener(
-      "pointerdown",
-      event => {
-        move(event.clientX);
-      },
-      { passive: true }
-    );
-
-    window.addEventListener(
-      "keydown",
-      event => {
-        if (!this.running) return;
-
-        if (
-          event.key === "ArrowLeft" ||
-          event.key.toLowerCase() === "a"
-        ) {
-          this.pointerX -= 28;
-        }
-
-        if (
-          event.key === "ArrowRight" ||
-          event.key.toLowerCase() === "d"
-        ) {
-          this.pointerX += 28;
-        }
-      }
-    );
-  },
-
   start() {
+    if (this.running) return;
+
+    this.reset();
     this.running = true;
-    this.score = 0;
-    this.stars = [];
 
-    const width =
-      this.canvas.clientWidth;
+    Utils.$("#starOverlay")?.classList.add("hidden-overlay");
 
-    const height =
-      this.canvas.clientHeight;
+    this.lastTime = performance.now();
 
-    this.player.x =
-      width / 2;
-
-    this.player.y =
-      height - 48;
-
-    this.pointerX =
-      this.player.x;
-
-    Utils.$("#starScore").textContent =
-      "0";
-
-    Utils.$("#starResult")?.classList.add(
-      "hidden"
-    );
-
-    Utils.$("#starStart")?.classList.add(
-      "hidden"
-    );
-
-    cancelAnimationFrame(
-      this.animation
-    );
-
-    this.lastTime =
-      performance.now();
-
-    this.loop(
-      this.lastTime
-    );
+    this.raf = requestAnimationFrame(time => this.loop(time));
   },
 
-  spawnStar() {
-    const width =
-      this.canvas.clientWidth;
+  jump() {
+    if (!this.running) return;
 
-    this.stars.push({
-      x:
-        Utils.random(
-          14,
-          width - 14
-        ),
-
-      y: -20,
-
-      radius:
-        Utils.random(
-          5,
-          9
-        ),
-
-      speed:
-        Utils.random(
-          100,
-          190
-        ),
-
-      rotation:
-        Utils.random(
-          0,
-          Math.PI * 2
-        ),
-
-      spin:
-        Utils.random(
-          -.03,
-          .03
-        )
-    });
+    if (this.player.grounded) {
+      this.player.velocityY = -480;
+      this.player.grounded = false;
+    }
   },
 
   loop(time) {
     if (!this.running) return;
 
-    const delta =
-      Math.min(
-        .035,
-        (time -
-          this.lastTime) /
-          1000
-      );
-
+    const delta = Math.min((time - this.lastTime) / 1000, .035);
     this.lastTime = time;
 
     this.update(delta);
     this.draw();
 
-    this.animation =
-      requestAnimationFrame(
-        next =>
-          this.loop(next)
-      );
+    this.raf = requestAnimationFrame(nextTime => this.loop(nextTime));
   },
 
   update(delta) {
-    const width =
-      this.canvas.clientWidth;
+    const gravity = 1250;
+    const ground = this.canvas.height - 55;
+    const speed = 230 + Math.min(this.score * 2.2, 160);
 
-    const height =
-      this.canvas.clientHeight;
+    this.player.velocityY += gravity * delta;
+    this.player.y += this.player.velocityY * delta;
 
-    this.player.x +=
-      (this.pointerX -
-        this.player.x) *
-      Math.min(
-        1,
-        delta * 12
-      );
-
-    this.player.x =
-      Utils.clamp(
-        this.player.x,
-        20,
-        width - 20
-      );
-
-    if (
-      Math.random() <
-      delta * 2.2
-    ) {
-      this.spawnStar();
+    if (this.player.y + this.player.height >= ground) {
+      this.player.y = ground - this.player.height;
+      this.player.velocityY = 0;
+      this.player.grounded = true;
     }
 
-    this.stars.forEach(
-      star => {
-        star.y +=
-          star.speed * delta;
+    this.spawnTimer += delta;
+    this.starTimer += delta;
 
-        star.rotation +=
-          star.spin;
+    if (this.spawnTimer > Math.max(.75, 1.3 - this.score / 150)) {
+      this.spawnTimer = 0;
+
+      this.obstacles.push({
+        x: this.canvas.width + 30,
+        y: ground - Utils.randomInt(24, 62),
+        width: Utils.randomInt(20, 32),
+        height: Utils.randomInt(25, 65)
+      });
+    }
+
+    if (this.starTimer > .9) {
+      this.starTimer = 0;
+
+      this.stars.push({
+        x: this.canvas.width + 20,
+        y: Utils.randomInt(100, ground - 90),
+        radius: 7
+      });
+    }
+
+    this.obstacles.forEach(obstacle => {
+      obstacle.x -= speed * delta;
+    });
+
+    this.stars.forEach(star => {
+      star.x -= speed * delta;
+    });
+
+    this.obstacles = this.obstacles.filter(o => o.x > -60);
+    this.stars = this.stars.filter(s => s.x > -30);
+
+    for (const obstacle of this.obstacles) {
+      if (this.collision(this.player, obstacle)) {
+        this.gameOver();
+        return;
       }
+    }
+
+    this.stars = this.stars.filter(star => {
+      if (this.circleCollision(this.player, star)) {
+        this.score++;
+        Utils.$("#starScore").textContent = this.score;
+        return false;
+      }
+
+      return true;
+    });
+  },
+
+  collision(a, b) {
+    return (
+      a.x < b.x + b.width &&
+      a.x + a.width > b.x &&
+      a.y < b.y + b.height &&
+      a.y + a.height > b.y
     );
+  },
 
-    const playerRadius =
-      this.player.size *
-      .58;
+  circleCollision(rect, circle) {
+    const nearestX = Utils.clamp(circle.x, rect.x, rect.x + rect.width);
+    const nearestY = Utils.clamp(circle.y, rect.y, rect.y + rect.height);
 
-    this.stars =
-      this.stars.filter(
-        star => {
-          const dx =
-            star.x -
-            this.player.x;
+    const dx = circle.x - nearestX;
+    const dy = circle.y - nearestY;
 
-          const dy =
-            star.y -
-            this.player.y;
-
-          const distance =
-            Math.sqrt(
-              dx * dx +
-                dy * dy
-            );
-
-          if (
-            distance <
-            playerRadius +
-              star.radius
-          ) {
-            this.score++;
-
-            Utils.$(
-              "#starScore"
-            ).textContent =
-              this.score;
-
-            return false;
-          }
-
-          return (
-            star.y <
-            height + 30
-          );
-        }
-      );
+    return dx * dx + dy * dy < circle.radius * circle.radius;
   },
 
   draw() {
-    const width =
-      this.canvas.clientWidth;
+    const ctx = this.ctx;
+    const width = this.canvas.width;
+    const height = this.canvas.height;
 
-    const height =
-      this.canvas.clientHeight;
+    ctx.clearRect(0, 0, width, height);
 
-    this.ctx.clearRect(
-      0,
-      0,
-      width,
-      height
-    );
+    const gradient = ctx.createLinearGradient(0, 0, 0, height);
+    gradient.addColorStop(0, "#07152b");
+    gradient.addColorStop(1, "#030914");
 
-    this.drawBackground();
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, height);
 
-    this.stars.forEach(
-      star =>
-        this.drawStar(star)
-    );
+    /* stars in background */
+    for (let i = 0; i < 25; i++) {
+      const x = (i * 83) % width;
+      const y = (i * 47) % (height * .65);
 
-    this.drawPlayer();
-  },
-
-  drawBackground() {
-    const width =
-      this.canvas.clientWidth;
-
-    const height =
-      this.canvas.clientHeight;
-
-    const gradient =
-      this.ctx.createLinearGradient(
-        0,
-        0,
-        0,
-        height
-      );
-
-    gradient.addColorStop(
-      0,
-      "rgba(7,17,42,.95)"
-    );
-
-    gradient.addColorStop(
-      1,
-      "rgba(2,7,20,.98)"
-    );
-
-    this.ctx.fillStyle =
-      gradient;
-
-    this.ctx.fillRect(
-      0,
-      0,
-      width,
-      height
-    );
-
-    for (
-      let i = 0;
-      i < 28;
-      i++
-    ) {
-      const x =
-        (i * 83) %
-        width;
-
-      const y =
-        (i * 137) %
-        height;
-
-      this.ctx.beginPath();
-
-      this.ctx.arc(
-        x,
-        y,
-        i % 3 === 0
-          ? 1.5
-          : .8,
-        0,
-        Math.PI * 2
-      );
-
-      this.ctx.fillStyle =
-        "rgba(255,255,255,.28)";
-
-      this.ctx.fill();
-    }
-  },
-
-  drawStar(star) {
-    const spikes = 5;
-    const outer =
-      star.radius;
-
-    const inner =
-      star.radius * .45;
-
-    this.ctx.save();
-
-    this.ctx.translate(
-      star.x,
-      star.y
-    );
-
-    this.ctx.rotate(
-      star.rotation
-    );
-
-    this.ctx.beginPath();
-
-    for (
-      let i = 0;
-      i <
-        spikes * 2;
-      i++
-    ) {
-      const radius =
-        i % 2 === 0
-          ? outer
-          : inner;
-
-      const angle =
-        -Math.PI / 2 +
-        (i * Math.PI) /
-          spikes;
-
-      const x =
-        Math.cos(angle) *
-        radius;
-
-      const y =
-        Math.sin(angle) *
-        radius;
-
-      if (i === 0) {
-        this.ctx.moveTo(
-          x,
-          y
-        );
-      } else {
-        this.ctx.lineTo(
-          x,
-          y
-        );
-      }
+      ctx.beginPath();
+      ctx.arc(x, y, i % 3 === 0 ? 1.2 : .7, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(210,230,255,.35)";
+      ctx.fill();
     }
 
-    this.ctx.closePath();
+    const ground = height - 55;
 
-    this.ctx.fillStyle =
-      "rgba(255,235,173,.9)";
+    ctx.fillStyle = "rgba(120,160,205,.12)";
+    ctx.fillRect(0, ground, width, 1);
 
-    this.ctx.shadowBlur =
-      14;
+    /* player */
+    ctx.save();
+    ctx.translate(
+      this.player.x + this.player.width / 2,
+      this.player.y + this.player.height / 2
+    );
 
-    this.ctx.shadowColor =
-      "rgba(255,220,130,.7)";
+    ctx.rotate(
+      this.player.grounded ? 0 : this.player.velocityY * .001
+    );
 
-    this.ctx.fill();
+    ctx.beginPath();
+    ctx.arc(0, 0, 14, 0, Math.PI * 2);
+    ctx.fillStyle = "#dceaff";
+    ctx.fill();
 
-    this.ctx.restore();
+    ctx.beginPath();
+    ctx.arc(-4, -3, 2, 0, Math.PI * 2);
+    ctx.arc(4, -3, 2, 0, Math.PI * 2);
+    ctx.fillStyle = "#071225";
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(-5, 5);
+    ctx.quadraticCurveTo(0, 9, 5, 5);
+    ctx.strokeStyle = "#071225";
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    ctx.restore();
+
+    /* obstacles */
+    this.obstacles.forEach(obstacle => {
+      const gradient = ctx.createLinearGradient(
+        obstacle.x,
+        obstacle.y,
+        obstacle.x + obstacle.width,
+        obstacle.y + obstacle.height
+      );
+
+      gradient.addColorStop(0, "#6f3150");
+      gradient.addColorStop(1, "#2d1731");
+
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.roundRect(
+        obstacle.x,
+        obstacle.y,
+        obstacle.width,
+        obstacle.height,
+        6
+      );
+      ctx.fill();
+    });
+
+    /* collectible stars */
+    this.stars.forEach(star => {
+      this.drawStar(
+        ctx,
+        star.x,
+        star.y,
+        star.radius,
+        "#d8e9ff"
+      );
+    });
   },
 
-  drawPlayer() {
-    const x =
-      this.player.x;
+  drawStar(ctx, x, y, radius, color) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.beginPath();
 
-    const y =
-      this.player.y;
+    for (let i = 0; i < 10; i++) {
+      const angle = -Math.PI / 2 + i * Math.PI / 5;
+      const r = i % 2 === 0 ? radius : radius * .42;
 
-    this.ctx.save();
+      const px = Math.cos(angle) * r;
+      const py = Math.sin(angle) * r;
 
-    this.ctx.translate(
-      x,
-      y
-    );
+      if (i === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    }
 
-    this.ctx.beginPath();
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.shadowColor = color;
+    ctx.shadowBlur = 10;
+    ctx.fill();
+    ctx.restore();
+  },
 
-    this.ctx.arc(
-      0,
-      0,
-      this.player.size,
-      0,
-      Math.PI * 2
-    );
+  gameOver() {
+    this.running = false;
 
-    this.ctx.fillStyle =
-      "rgba(255,255,255,.1)";
+    cancelAnimationFrame(this.raf);
 
-    this.ctx.shadowBlur =
-      24;
+    if (this.score > this.best) {
+      this.best = this.score;
 
-    this.ctx.shadowColor =
-      "rgba(150,190,255,.8)";
+      try {
+        localStorage.setItem("aaStarBest", String(this.best));
+      } catch {}
 
-    this.ctx.fill();
+      Utils.$("#starBest").textContent = this.best;
+    }
 
-    this.ctx.beginPath();
+    const overlay = Utils.$("#starOverlay");
 
-    this.ctx.moveTo(
-      0,
-      -15
-    );
+    overlay.innerHTML = `
+      <h4>Run Complete</h4>
+      <p>You collected ${this.score} star${this.score === 1 ? "" : "s"}.</p>
+      <button id="starRestart" class="btn btn-primary">Run Again</button>
+    `;
 
-    this.ctx.lineTo(
-      14,
-      12
-    );
+    overlay.classList.remove("hidden-overlay");
 
-    this.ctx.lineTo(
-      0,
-      7
-    );
-
-    this.ctx.lineTo(
-      -14,
-      12
-    );
-
-    this.ctx.closePath();
-
-    this.ctx.fillStyle =
-      "rgba(235,242,255,.95)";
-
-    this.ctx.fill();
-
-    this.ctx.restore();
+    Utils.$("#starRestart")?.addEventListener("click", () => {
+      this.start();
+    });
   }
 };
 
@@ -2574,266 +1407,144 @@ const StarRun = {
 const EnglishGame = {
   questions: [
     {
-      question:
-        "What does 'happy' mean?",
-      options: [
-        "Sedih",
-        "Senang",
-        "Marah",
-        "Takut"
-      ],
-      answer:
-        "Senang"
+      q: 'What is the opposite of "big"?',
+      options: ["Small", "Long", "Tall", "Fast"],
+      answer: "Small"
     },
-
     {
-      question:
-        "What does 'birthday' mean?",
-      options: [
-        "Hari ulang tahun",
-        "Hari sekolah",
-        "Hari libur",
-        "Hari minggu"
-      ],
-      answer:
-        "Hari ulang tahun"
+      q: 'What does "happy" mean?',
+      options: ["Senang", "Marah", "Lapar", "Lelah"],
+      answer: "Senang"
     },
-
     {
-      question:
-        "What does 'love' mean?",
-      options: [
-        "Cinta",
-        "Marah",
-        "Tidur",
-        "Pergi"
-      ],
-      answer:
-        "Cinta"
+      q: 'Choose the correct word: "I ___ a student."',
+      options: ["am", "is", "are", "be"],
+      answer: "am"
     },
-
     {
-      question:
-        "What does 'smile' mean?",
+      q: 'What is the opposite of "hot"?',
+      options: ["Cold", "High", "Fast", "Hard"],
+      answer: "Cold"
+    },
+    {
+      q: 'Which one is a color?',
+      options: ["Blue", "Chair", "Water", "Run"],
+      answer: "Blue"
+    },
+    {
+      q: 'What does "beautiful" mean?',
+      options: ["Indah", "Cepat", "Kecil", "Keras"],
+      answer: "Indah"
+    },
+    {
+      q: 'Choose the correct sentence.',
       options: [
-        "Menangis",
-        "Tersenyum",
-        "Berlari",
-        "Tidur"
+        "She is happy.",
+        "She are happy.",
+        "She am happy.",
+        "She be happy."
       ],
-      answer:
-        "Tersenyum"
+      answer: "She is happy."
     }
   ],
 
-  index: 0,
+  current: 0,
   score: 0,
   locked: false,
+  activeQuestions: [],
 
   init() {
+    this.activeQuestions = Utils.shuffle(this.questions).slice(0, 5);
+
     this.render();
 
-    Utils.$(
-      "#englishNext"
-    )?.addEventListener(
-      "click",
-      () =>
-        this.next()
-    );
+    Utils.$("#englishNext")?.addEventListener("click", () => {
+      this.next();
+    });
 
-    Utils.$(
-      "#englishRestart"
-    )?.addEventListener(
-      "click",
-      () =>
-        this.restart()
-    );
+    Utils.$("#englishRestart")?.addEventListener("click", () => {
+      this.restart();
+    });
   },
 
   render() {
-    const question =
-      this.questions[
-        this.index
-      ];
+    const current = this.activeQuestions[this.current];
 
-    if (!question)
-      return;
+    if (!current) return;
 
-    const questionEl =
-      Utils.$(
-        "#englishQuestion"
-      );
+    const progress = Utils.$("#englishProgress");
+    const question = Utils.$("#englishQuestion");
+    const options = Utils.$("#englishOptions");
+    const feedback = Utils.$("#englishFeedback");
+    const next = Utils.$("#englishNext");
 
-    const optionsEl =
-      Utils.$(
-        "#englishOptions"
-      );
+    progress.textContent =
+      `${this.current + 1} / ${this.activeQuestions.length}`;
 
-    const progressEl =
-      Utils.$(
-        "#englishProgress"
-      );
+    question.textContent = current.q;
 
-    const feedbackEl =
-      Utils.$(
-        "#englishFeedback"
-      );
-
-    const nextEl =
-      Utils.$(
-        "#englishNext"
-      );
-
-    if (
-      !questionEl ||
-      !optionsEl
-    ) {
-      return;
-    }
+    options.innerHTML = "";
+    feedback.textContent = "";
+    next.classList.add("hidden");
 
     this.locked = false;
 
-    questionEl.textContent =
-      question.question;
+    current.options.forEach(option => {
+      const button = document.createElement("button");
 
-    progressEl.textContent =
-      `${this.index + 1} / ${this.questions.length}`;
+      button.type = "button";
+      button.className = "answer-btn";
+      button.textContent = option;
 
-    feedbackEl.textContent =
-      "";
+      button.addEventListener("click", () => {
+        this.answer(option, button);
+      });
 
-    nextEl?.classList.add(
-      "hidden"
-    );
+      options.appendChild(button);
+    });
 
-    optionsEl.innerHTML =
-      "";
-
-    question.options.forEach(
-      option => {
-        const button =
-          document.createElement(
-            "button"
-          );
-
-        button.type =
-          "button";
-
-        button.className =
-          "answer-btn";
-
-        button.textContent =
-          option;
-
-        button.addEventListener(
-          "click",
-          () =>
-            this.answer(
-              option,
-              button
-            )
-        );
-
-        optionsEl.appendChild(
-          button
-        );
-      }
-    );
-
-    Utils.$(
-      "#englishScore"
-    ).textContent =
-      this.score;
+    Utils.$("#englishScore").textContent = this.score;
   },
 
-  answer(
-    value,
-    clicked
-  ) {
-    if (this.locked)
-      return;
+  answer(value, clicked) {
+    if (this.locked) return;
 
     this.locked = true;
 
-    const question =
-      this.questions[
-        this.index
-      ];
+    const current = this.activeQuestions[this.current];
+    const buttons = Utils.$$(".answer-btn", Utils.$("#englishOptions"));
+    const feedback = Utils.$("#englishFeedback");
 
-    const buttons =
-      Utils.$$(
-        "#englishOptions .answer-btn"
-      );
+    buttons.forEach(button => {
+      button.disabled = true;
 
-    buttons.forEach(
-      button => {
-        button.disabled =
-          true;
-
-        if (
-          button.textContent ===
-          question.answer
-        ) {
-          button.classList.add(
-            "correct"
-          );
-        }
+      if (button.textContent === current.answer) {
+        button.classList.add("correct");
       }
-    );
+    });
 
-    const feedback =
-      Utils.$(
-        "#englishFeedback"
-      );
-
-    if (
-      value ===
-      question.answer
-    ) {
+    if (value === current.answer) {
       this.score++;
-
-      clicked.classList.add(
-        "correct"
-      );
-
-      feedback.textContent =
-        "Benar. Good job.";
+      clicked.classList.add("correct");
+      feedback.textContent = "Correct. Well done.";
     } else {
-      clicked.classList.add(
-        "wrong"
-      );
-
-      feedback.textContent =
-        `Jawabannya: ${question.answer}`;
+      clicked.classList.add("wrong");
+      feedback.textContent = `Correct answer: ${current.answer}`;
     }
 
-    Utils.$(
-      "#englishScore"
-    ).textContent =
-      this.score;
+    Utils.$("#englishScore").textContent = this.score;
 
-    if (
-      this.index <
-      this.questions.length -
-        1
-    ) {
-      Utils.$(
-        "#englishNext"
-      )?.classList.remove(
-        "hidden"
-      );
+    if (this.current < this.activeQuestions.length - 1) {
+      Utils.$("#englishNext").classList.remove("hidden");
     } else {
       this.finish();
     }
   },
 
   next() {
-    this.index++;
+    this.current++;
 
-    if (
-      this.index >=
-      this.questions.length
-    ) {
+    if (this.current >= this.activeQuestions.length) {
       this.finish();
       return;
     }
@@ -2842,60 +1553,26 @@ const EnglishGame = {
   },
 
   finish() {
-    const result =
-      Utils.$(
-        "#englishResult"
-      );
+    Utils.$("#englishOptions").innerHTML = "";
+    Utils.$("#englishNext").classList.add("hidden");
 
-    const restart =
-      Utils.$(
-        "#englishRestart"
-      );
-
-    const options =
-      Utils.$(
-        "#englishOptions"
-      );
-
-    const next =
-      Utils.$(
-        "#englishNext"
-      );
-
-    next?.classList.add(
-      "hidden"
-    );
-
-    options.innerHTML =
-      "";
+    const result = Utils.$("#englishResult");
+    const restart = Utils.$("#englishRestart");
 
     result.textContent =
-      `Score kamu ${this.score} / ${this.questions.length}`;
+      `Final Score: ${this.score} / ${this.activeQuestions.length}`;
 
-    result.classList.remove(
-      "hidden"
-    );
-
-    restart?.classList.remove(
-      "hidden"
-    );
+    result.classList.remove("hidden");
+    restart.classList.remove("hidden");
   },
 
   restart() {
-    this.index = 0;
+    this.current = 0;
     this.score = 0;
+    this.activeQuestions = Utils.shuffle(this.questions).slice(0, 5);
 
-    Utils.$(
-      "#englishResult"
-    )?.classList.add(
-      "hidden"
-    );
-
-    Utils.$(
-      "#englishRestart"
-    )?.classList.add(
-      "hidden"
-    );
+    Utils.$("#englishResult").classList.add("hidden");
+    Utils.$("#englishRestart").classList.add("hidden");
 
     this.render();
   }
@@ -2906,1516 +1583,367 @@ const EnglishGame = {
 ========================================================= */
 
 const Surprise = {
+  opened: false,
+
   init() {
-    const button =
-      Utils.$(
-        "#surpriseBtn"
-      );
+    const button = Utils.$("#surpriseBtn");
+    const before = Utils.$("#surpriseBefore");
+    const reveal = Utils.$("#surpriseReveal");
 
-    const content =
-      Utils.$(
-        "#surpriseContent"
-      );
+    if (!button || !before || !reveal) return;
 
-    if (
-      !button ||
-      !content
-    ) {
-      return;
-    }
+    button.addEventListener("click", () => {
+      if (this.opened) return;
 
-    button.addEventListener(
-      "click",
-      () => {
-        content.classList.toggle(
-          "show"
-        );
+      this.opened = true;
 
-        button.textContent =
-          content.classList.contains(
-            "show"
-          )
-            ? "Tutup"
-            : "Buka Surprise";
+      before.style.opacity = "0";
+      before.style.transform = "scale(.96)";
+      before.style.transition = "opacity .7s, transform .7s";
 
-        if (
-          content.classList.contains(
-            "show"
-          )
-        ) {
-          this.createConfetti();
-        }
-      }
-    );
+      setTimeout(() => {
+        before.style.display = "none";
+        reveal.classList.add("active");
+
+        this.fireParticles();
+
+        AudioManager.tryPlay();
+      }, 750);
+    });
   },
 
-  createConfetti() {
-    const container =
-      document.createElement(
-        "div"
-      );
+  fireParticles() {
+    const section = Utils.$("#surprise");
 
-    container.className =
-      "surprise-confetti";
+    if (!section) return;
 
-    document.body.appendChild(
-      container
-    );
+    for (let i = 0; i < 35; i++) {
+      const particle = document.createElement("span");
 
-    for (
-      let i = 0;
-      i < 45;
-      i++
-    ) {
-      const piece =
-        document.createElement(
-          "span"
-        );
+      particle.style.position = "absolute";
+      particle.style.left = `${Math.random() * 100}%`;
+      particle.style.top = `${60 + Math.random() * 30}%`;
+      particle.style.width = `${Math.random() * 3 + 1}px`;
+      particle.style.height = particle.style.width;
+      particle.style.borderRadius = "50%";
+      particle.style.background = "rgba(205,225,250,.8)";
+      particle.style.boxShadow = "0 0 12px rgba(160,200,245,.8)";
+      particle.style.pointerEvents = "none";
+      particle.style.zIndex = "1";
 
-      piece.style.left =
-        `${Math.random() * 100}%`;
+      section.appendChild(particle);
 
-      piece.style.animationDelay =
-        `${Math.random() * .8}s`;
+      const duration = 1500 + Math.random() * 1800;
 
-      piece.style.animationDuration =
-        `${2 + Math.random() * 2}s`;
-
-      piece.textContent =
+      particle.animate(
         [
-          "✦",
-          "✧",
-          "♡",
-          "◆",
-          "✿"
-        ][
-          Utils.randomInt(
-            0,
-            4
-          )
-        ];
-
-      container.appendChild(
-        piece
+          {
+            transform: "translate3d(0,0,0) scale(.5)",
+            opacity: 0
+          },
+          {
+            transform: `translate3d(${Utils.random(-80,80)}px, -${Utils.random(150,420)}px, 0) scale(1)`,
+            opacity: 1
+          },
+          {
+            transform: `translate3d(${Utils.random(-130,130)}px, -${Utils.random(350,650)}px, 0) scale(0)`,
+            opacity: 0
+          }
+        ],
+        {
+          duration,
+          easing: "cubic-bezier(.2,.8,.2,1)"
+        }
       );
-    }
 
-    setTimeout(
-      () => {
-        container.remove();
-      },
-      4200
-    );
+      setTimeout(() => particle.remove(), duration + 100);
+    }
   }
 };
 
+
 /* =========================================================
-   PIN LOCK
+   PIN GATE
 ========================================================= */
 
-const PinLock = {
-  pin: "230226",
-  input: "",
+const PinGate = {
   unlocked: false,
-  maxAttempts: 5,
-  attempts: 0,
+  value: "",
+  pin: "230226",
 
   init() {
-    this.create();
+    const gate = Utils.$("#pinGate");
+    const pad = Utils.$("#pinPad");
+    const dots = Utils.$$("#pinDots i");
+    const error = Utils.$("#pinError");
 
-    document.body.classList.add(
-      "pin-locked"
-    );
-  },
+    if (!gate || !pad) return;
 
-  create() {
-    if (
-      Utils.$(
-        "#pinLock"
-      )
-    ) {
-      return;
-    }
+    document.body.classList.add("locked");
 
-    const overlay =
-      document.createElement(
-        "div"
-      );
-
-    overlay.id =
-      "pinLock";
-
-    overlay.innerHTML = `
-      <div class="pin-backdrop"></div>
-
-      <div class="pin-card">
-
-        <div class="pin-orbit orbit-one"></div>
-        <div class="pin-orbit orbit-two"></div>
-
-        <div class="pin-icon">
-          <span>✦</span>
-        </div>
-
-        <p class="pin-eyebrow">
-          A LITTLE SURPRISE
-        </p>
-
-        <h1>
-          Untuk kamu
-        </h1>
-
-        <p class="pin-subtitle">
-          Masukin PIN dulu ya
-        </p>
-
-        <div
-          class="pin-dots"
-          id="pinDots"
-          aria-label="PIN progress"
-        >
-          <span></span>
-          <span></span>
-          <span></span>
-          <span></span>
-          <span></span>
-          <span></span>
-        </div>
-
-        <p
-          class="pin-error"
-          id="pinError"
-        ></p>
-
-        <div
-          class="pin-keypad"
-          id="pinKeypad"
-        >
-          <button type="button" data-pin="1">1</button>
-          <button type="button" data-pin="2">2</button>
-          <button type="button" data-pin="3">3</button>
-          <button type="button" data-pin="4">4</button>
-          <button type="button" data-pin="5">5</button>
-          <button type="button" data-pin="6">6</button>
-          <button type="button" data-pin="7">7</button>
-          <button type="button" data-pin="8">8</button>
-          <button type="button" data-pin="9">9</button>
-          <button
-            type="button"
-            data-pin="clear"
-            class="pin-action"
-          >
-            Hapus
-          </button>
-          <button type="button" data-pin="0">0</button>
-          <button
-            type="button"
-            data-pin="back"
-            class="pin-action"
-          >
-            ←
-          </button>
-        </div>
-
-        <p class="pin-footer">
-          dibuat khusus untuk kamu
-        </p>
-
-      </div>
-    `;
-
-    document.body.appendChild(
-      overlay
-    );
-
-    this.injectStyles();
-    this.bind();
-  },
-
-  bind() {
-    const keypad =
-      Utils.$(
-        "#pinKeypad"
-      );
-
-    keypad?.addEventListener(
-      "click",
-      event => {
-        const button =
-          event.target.closest(
-            "button"
-          );
-
-        if (!button)
-          return;
-
-        const value =
-          button.dataset.pin;
-
-        if (
-          value === "clear"
-        ) {
-          this.clear();
-          return;
-        }
-
-        if (
-          value === "back"
-        ) {
-          this.backspace();
-          return;
-        }
-
-        this.add(value);
-      }
-    );
-
-    window.addEventListener(
-      "keydown",
-      event => {
-        if (this.unlocked)
-          return;
-
-        if (
-          /^[0-9]$/.test(
-            event.key
-          )
-        ) {
-          this.add(
-            event.key
-          );
-        }
-
-        if (
-          event.key ===
-          "Backspace"
-        ) {
-          this.backspace();
-        }
-
-        if (
-          event.key ===
-          "Escape"
-        ) {
-          this.clear();
-        }
-      }
-    );
-  },
-
-  add(number) {
-    if (
-      this.input.length >=
-      this.pin.length
-    ) {
-      return;
-    }
-
-    this.input += number;
-
-    this.updateDots();
-
-    if (
-      this.input.length ===
-      this.pin.length
-    ) {
-      setTimeout(
-        () => this.check(),
-        130
-      );
-    }
-  },
-
-  backspace() {
-    if (!this.input.length)
-      return;
-
-    this.input =
-      this.input.slice(
-        0,
-        -1
-      );
-
-    this.updateDots();
-    this.clearError();
-  },
-
-  clear() {
-    this.input = "";
-
-    this.updateDots();
-    this.clearError();
-  },
-
-  updateDots() {
-    const dots =
-      Utils.$$(
-        "#pinDots span"
-      );
-
-    dots.forEach(
-      (dot, index) => {
+    const render = () => {
+      dots.forEach((dot, i) => {
         dot.classList.toggle(
           "filled",
-          index <
-            this.input.length
+          i < this.value.length
         );
-      }
-    );
-  },
+      });
+    };
 
-  check() {
-    if (
-      this.input ===
-      this.pin
-    ) {
-      this.unlock();
-      return;
-    }
+    const fail = () => {
+      error.textContent = "PIN-nya belum pas ✦";
 
-    this.attempts++;
+      gate.classList.remove("pin-shake");
 
-    const card =
-      Utils.$(
-        ".pin-card"
-      );
+      void gate.offsetWidth;
 
-    card?.classList.add(
-      "wrong"
-    );
+      gate.classList.add("pin-shake");
 
-    setTimeout(
-      () => {
-        card?.classList.remove(
-          "wrong"
-        );
-      },
-      500
-    );
+      setTimeout(() => {
+        error.textContent = "";
+      }, 1100);
 
-    const remaining =
-      this.maxAttempts -
-      this.attempts;
+      this.value = "";
 
-    Utils.$(
-      "#pinError"
-    ).textContent =
-      remaining > 0
-        ? `PIN belum benar. Coba lagi.`
-        : "Coba pelan-pelan lagi ya.";
+      render();
+    };
 
-    this.input = "";
+    pad.addEventListener("click", event => {
+      const button = event.target.closest("button[data-pin]");
 
-    this.updateDots();
-  },
+      if (!button) return;
 
-  clearError() {
-    const error =
-      Utils.$(
-        "#pinError"
-      );
+      const key = button.dataset.pin;
 
-    if (error) {
-      error.textContent =
-        "";
-    }
-  },
-
-  unlock() {
-    this.unlocked = true;
-
-    const overlay =
-      Utils.$(
-        "#pinLock"
-      );
-
-    overlay?.classList.add(
-      "unlocking"
-    );
-
-    document.body.classList.remove(
-      "pin-locked"
-    );
-
-    setTimeout(
-      () => {
-        overlay?.remove();
-
-        Toast.show(
-          "Welcome, Neng."
-        );
-      },
-      850
-    );
-  },
-
-  injectStyles() {
-    if (
-      Utils.$(
-        "#pinLockStyles"
-      )
-    ) {
-      return;
-    }
-
-    const style =
-      document.createElement(
-        "style"
-      );
-
-    style.id =
-      "pinLockStyles";
-
-    style.textContent = `
-      body.pin-locked {
-        overflow: hidden !important;
-        touch-action: none;
+      if (key === "clear") {
+        this.value = "";
+      } else if (key === "back") {
+        this.value = this.value.slice(0, -1);
+      } else if (this.value.length < 6) {
+        this.value += key;
       }
 
-      #pinLock {
-        position: fixed;
-        inset: 0;
-        z-index: 99999;
-        display: grid;
-        place-items: center;
-        padding: 22px;
-        isolation: isolate;
-        overflow: hidden;
-      }
+      render();
 
-      #pinLock .pin-backdrop {
-        position: absolute;
-        inset: 0;
-        background:
-          radial-gradient(
-            circle at 50% 25%,
-            rgba(54,91,153,.34),
-            transparent 36%
-          ),
-          radial-gradient(
-            circle at 20% 80%,
-            rgba(123,67,120,.22),
-            transparent 32%
-          ),
-          linear-gradient(
-            145deg,
-            #030817,
-            #07152d 52%,
-            #020612
+      if (this.value.length === 6) {
+        if (this.value === this.pin) {
+          this.unlocked = true;
+
+          gate.classList.add("unlocked");
+
+          document.body.classList.add("locked");
+
+          Toast.show(
+            "PIN benar. Sekarang buka hadiahnya ✦"
           );
-      }
 
-      #pinLock .pin-backdrop::before {
-        content: "";
-        position: absolute;
-        inset: -20%;
-        background:
-          radial-gradient(
-            circle,
-            rgba(255,255,255,.06) 0 1px,
-            transparent 1.5px
-          );
-        background-size: 42px 42px;
-        opacity: .45;
-        animation:
-          pinStars 22s linear infinite;
-      }
-
-      @keyframes pinStars {
-        to {
-          transform: translate3d(
-            -42px,
-            -42px,
-            0
-          );
+          setTimeout(() => {
+            gate.remove();
+          }, 650);
+        } else {
+          fail();
         }
       }
+    });
 
-      #pinLock .pin-card {
-        position: relative;
-        width: min(
-          100%,
-          390px
-        );
-        padding: 30px 22px 24px;
-        border:
-          1px solid
-          rgba(255,255,255,.13);
-        border-radius: 34px;
-        background:
-          linear-gradient(
-            145deg,
-            rgba(255,255,255,.105),
-            rgba(255,255,255,.035)
-          );
-        box-shadow:
-          0 35px 100px
-          rgba(0,0,0,.55),
-          inset 0 1px 0
-          rgba(255,255,255,.1);
-        backdrop-filter:
-          blur(26px)
-          saturate(125%);
-        -webkit-backdrop-filter:
-          blur(26px)
-          saturate(125%);
-        text-align: center;
-        overflow: hidden;
-        transform:
-          translateY(0)
-          scale(1);
-        transition:
-          transform .65s
-          cubic-bezier(.2,.8,.2,1),
-          opacity .65s ease;
-      }
-
-      #pinLock .pin-card::after {
-        content: "";
-        position: absolute;
-        width: 190px;
-        height: 190px;
-        border-radius: 50%;
-        right: -100px;
-        top: -90px;
-        background:
-          rgba(150,190,255,.11);
-        filter: blur(5px);
-      }
-
-      #pinLock .pin-card.wrong {
-        animation:
-          pinShake .42s
-          ease;
-      }
-
-      @keyframes pinShake {
-        0%,100% {
-          transform: translateX(0);
-        }
-        20% {
-          transform: translateX(-8px);
-        }
-        40% {
-          transform: translateX(8px);
-        }
-        60% {
-          transform: translateX(-6px);
-        }
-        80% {
-          transform: translateX(5px);
-        }
-      }
-
-      #pinLock.unlocking .pin-card {
-        opacity: 0;
-        transform:
-          translateY(-18px)
-          scale(.94);
-      }
-
-      #pinLock .pin-icon {
-        position: relative;
-        z-index: 2;
-        width: 66px;
-        height: 66px;
-        margin: 0 auto 15px;
-        display: grid;
-        place-items: center;
-        border-radius: 22px;
-        background:
-          linear-gradient(
-            145deg,
-            rgba(255,255,255,.17),
-            rgba(255,255,255,.05)
-          );
-        border:
-          1px solid
-          rgba(255,255,255,.13);
-        box-shadow:
-          0 16px 38px
-          rgba(0,0,0,.25);
-      }
-
-      #pinLock .pin-icon span {
-        font-size: 27px;
-        color: #e9f0ff;
-        text-shadow:
-          0 0 24px
-          rgba(175,205,255,.9);
-        animation:
-          pinFloat 3s ease-in-out
-          infinite;
-      }
-
-      @keyframes pinFloat {
-        0%,100% {
-          transform:
-            translateY(0)
-            rotate(0deg);
-        }
-        50% {
-          transform:
-            translateY(-4px)
-            rotate(8deg);
-        }
-      }
-
-      #pinLock .pin-eyebrow {
-        position: relative;
-        z-index: 2;
-        margin: 0 0 7px;
-        font-size: 9px;
-        letter-spacing: .28em;
-        color:
-          rgba(211,224,249,.62);
-      }
-
-      #pinLock h1 {
-        position: relative;
-        z-index: 2;
-        margin: 0;
-        color: #f4f7ff;
-        font-size: clamp(
-          28px,
-          8vw,
-          38px
-        );
-        line-height: 1;
-        letter-spacing: -.04em;
-        font-weight: 700;
-      }
-
-      #pinLock .pin-subtitle {
-        position: relative;
-        z-index: 2;
-        margin:
-          10px 0 21px;
-        color:
-          rgba(222,231,247,.68);
-        font-size: 13px;
-      }
-
-      #pinLock .pin-dots {
-        position: relative;
-        z-index: 2;
-        display: flex;
-        justify-content: center;
-        gap: 9px;
-        margin-bottom: 14px;
-      }
-
-      #pinLock .pin-dots span {
-        width: 9px;
-        height: 9px;
-        border-radius: 50%;
-        border:
-          1px solid
-          rgba(255,255,255,.34);
-        background:
-          rgba(255,255,255,.04);
-        transition:
-          transform .18s ease,
-          background .18s ease,
-          box-shadow .18s ease;
-      }
-
-      #pinLock .pin-dots span.filled {
-        background:
-          #edf4ff;
-        box-shadow:
-          0 0 15px
-          rgba(180,210,255,.85);
-        transform:
-          scale(1.15);
-      }
-
-      #pinLock .pin-error {
-        position: relative;
-        z-index: 2;
-        min-height: 17px;
-        margin: 0 0 9px;
-        color:
-          rgba(255,180,190,.9);
-        font-size: 11px;
-      }
-
-      #pinLock .pin-keypad {
-        position: relative;
-        z-index: 2;
-        display: grid;
-        grid-template-columns:
-          repeat(3, 1fr);
-        gap: 10px;
-      }
-
-      #pinLock .pin-keypad button {
-        min-height: 58px;
-        border: 0;
-        border-radius: 19px;
-        color: #f1f5ff;
-        background:
-          rgba(255,255,255,.075);
-        border:
-          1px solid
-          rgba(255,255,255,.09);
-        font:
-          inherit;
-        font-size: 18px;
-        font-weight: 600;
-        cursor: pointer;
-        -webkit-tap-highlight-color:
-          transparent;
-        transition:
-          transform .14s ease,
-          background .14s ease,
-          border-color .14s ease;
-      }
-
-      #pinLock .pin-keypad button:active {
-        transform:
-          scale(.93);
-        background:
-          rgba(255,255,255,.16);
-      }
-
-      #pinLock .pin-keypad
-      button.pin-action {
-        font-size: 11px;
-        color:
-          rgba(226,234,249,.72);
-      }
-
-      #pinLock .pin-footer {
-        position: relative;
-        z-index: 2;
-        margin:
-          19px 0 0;
-        color:
-          rgba(211,222,242,.43);
-        font-size: 10px;
-        letter-spacing: .08em;
-      }
-
-      #pinLock .pin-orbit {
-        position: absolute;
-        border-radius: 50%;
-        border:
-          1px solid
-          rgba(190,215,255,.08);
-        pointer-events: none;
-      }
-
-      #pinLock .orbit-one {
-        width: 310px;
-        height: 310px;
-        left: 50%;
-        top: 50%;
-        transform:
-          translate(-50%,-50%);
-        animation:
-          orbitRotate 20s
-          linear infinite;
-      }
-
-      #pinLock .orbit-two {
-        width: 245px;
-        height: 245px;
-        left: 50%;
-        top: 50%;
-        transform:
-          translate(-50%,-50%);
-        border-style: dashed;
-        opacity: .55;
-        animation:
-          orbitRotateReverse 16s
-          linear infinite;
-      }
-
-      @keyframes orbitRotate {
-        to {
-          transform:
-            translate(-50%,-50%)
-            rotate(360deg);
-        }
-      }
-
-      @keyframes orbitRotateReverse {
-        to {
-          transform:
-            translate(-50%,-50%)
-            rotate(-360deg);
-        }
-      }
-
-      @media (max-width: 370px) {
-        #pinLock .pin-card {
-          padding:
-            24px 17px 20px;
-          border-radius: 28px;
-        }
-
-        #pinLock .pin-keypad {
-          gap: 7px;
-        }
-
-        #pinLock .pin-keypad button {
-          min-height: 52px;
-          border-radius: 16px;
-        }
-      }
-    `;
-
-    document.head.appendChild(
-      style
-    );
+    render();
   }
 };
 
+
 /* =========================================================
-   PAGE-BY-PAGE CONTINUE NAVIGATION
+   PAGE-BY-PAGE NAVIGATION
 ========================================================= */
 
-const PageNavigation = {
-  initialized: false,
+const PageNavigator = {
+  ids: [
+    "home",
+    "gift",
+    "story",
+    "clock",
+    "memories",
+    "letter",
+    "cake",
+    "wish",
+    "love",
+    "games",
+    "surprise"
+  ],
 
   init() {
-    if (
-      this.initialized
-    ) {
-      return;
-    }
+    this.ids.forEach((id, index) => {
+      const section = document.getElementById(id);
 
-    this.initialized = true;
+      if (!section || id === "surprise") return;
 
-    const sections =
-      Utils.$$(
-        "main section, body > section, .page-section"
-      ).filter(
-        section =>
-          !section.closest(
-            "#pinLock"
-          )
-      );
+      let next = section.querySelector(":scope > .page-next");
 
-    if (!sections.length) {
-      return;
-    }
+      if (!next) {
+        next = document.createElement("button");
 
-    sections.forEach(
-      (section, index) => {
-        if (
-          section.dataset
-            .noContinue ===
-          "true"
-        ) {
-          return;
-        }
+        next.type = "button";
+        next.className = "page-next";
 
-        if (
-          section.querySelector(
-            ".continue-page-btn"
-          )
-        ) {
-          return;
-        }
-
-        const button =
-          document.createElement(
-            "button"
-          );
-
-        button.type =
-          "button";
-
-        button.className =
-          "continue-page-btn";
-
-        const isLast =
-          index ===
-          sections.length - 1;
-
-        button.innerHTML =
-          isLast
-            ? `
-              <span>
-                selesai
-              </span>
-              <b>✦</b>
-            `
-            : `
-              <span>
-                lanjut
-              </span>
-              <b>↓</b>
-            `;
-
-        button.addEventListener(
-          "click",
-          () => {
-            if (isLast) {
-              this.finish();
-              return;
+        next.innerHTML = `
+          <span>
+            ${
+              index === this.ids.length - 2
+                ? "Sampai akhir"
+                : "Lanjut"
             }
+          </span>
+          <b>↓</b>
+        `;
 
-            const next =
-              sections[index + 1];
+        section.appendChild(next);
+      }
 
-            next?.scrollIntoView({
-              behavior:
-                "smooth",
-              block:
-                "start"
-            });
-          }
+      next.addEventListener("click", () => {
+        const target = document.getElementById(
+          this.ids[index + 1]
         );
 
-        section.appendChild(
-          button
-        );
-      }
-    );
+        target?.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
+      });
+    });
 
-    this.injectStyles();
-  },
+    /*
+      Tombol bawaan website tetap dipertahankan.
+      Tombol page-next dipakai sebagai alur utama per halaman.
+    */
 
-  finish() {
-    Toast.show(
-      "Makasih sudah sampai akhir."
-    );
-
-    const final =
-      document.querySelector(
-        "[data-final-message]"
-      );
-
-    if (final) {
-      final.classList.add(
-        "show"
-      );
-    }
-  },
-
-  injectStyles() {
-    if (
-      Utils.$(
-        "#continueNavigationStyles"
-      )
-    ) {
-      return;
-    }
-
-    const style =
-      document.createElement(
-        "style"
-      );
-
-    style.id =
-      "continueNavigationStyles";
-
-    style.textContent = `
-      .continue-page-btn {
-        position: relative;
-        z-index: 20;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-        min-width: 142px;
-        min-height: 46px;
-        margin:
-          30px auto
-          12px;
-        padding:
-          11px 19px;
-        border-radius: 999px;
-        border:
-          1px solid
-          rgba(255,255,255,.14);
-        background:
-          linear-gradient(
-            145deg,
-            rgba(255,255,255,.13),
-            rgba(255,255,255,.045)
-          );
-        color:
-          rgba(242,247,255,.92);
-        box-shadow:
-          0 12px 35px
-          rgba(0,0,0,.18),
-          inset 0 1px 0
-          rgba(255,255,255,.1);
-        backdrop-filter:
-          blur(14px);
-        -webkit-backdrop-filter:
-          blur(14px);
-        font:
-          inherit;
-        font-size: 12px;
-        letter-spacing: .08em;
-        text-transform:
-          lowercase;
-        cursor: pointer;
-        transition:
-          transform .25s ease,
-          background .25s ease,
-          box-shadow .25s ease;
-      }
-
-      .continue-page-btn b {
-        font-size: 14px;
-        font-weight: 500;
-      }
-
-      .continue-page-btn:hover {
-        transform:
-          translateY(-3px);
-        background:
-          rgba(255,255,255,.16);
-        box-shadow:
-          0 17px 42px
-          rgba(0,0,0,.25);
-      }
-
-      .continue-page-btn:active {
-        transform:
-          translateY(0)
-          scale(.96);
-      }
-
-      section {
-        scroll-margin-top: 18px;
-      }
-    `;
-
-    document.head.appendChild(
-      style
+    document.documentElement.classList.add(
+      "guided-pages"
     );
   }
 };
 
+
 /* =========================================================
-   50+ AESTHETIC DECORATIONS
+   60+ AESTHETIC DECORATIONS
 ========================================================= */
 
 const Decorations = {
   symbols: [
     "✦",
     "✧",
-    "⋆",
     "♡",
-    "♥",
-    "◇",
-    "◆",
-    "❀",
+    "⋆",
+    "·",
     "✿",
-    "❁",
-    "☾",
-    "✷",
-    "✹",
-    "✺",
-    "·"
-  ],
-
-  classes: [
-    "decor-star",
-    "decor-sparkle",
-    "decor-heart",
-    "decor-diamond",
-    "decor-flower",
-    "decor-moon"
+    "❀",
+    "✩",
+    "◆",
+    "◇"
   ],
 
   init() {
-    const sections =
-      Utils.$$(
-        "main section, body > section, .page-section"
-      ).filter(
-        section =>
-          !section.closest(
-            "#pinLock"
-          )
+    const layer = Utils.$("#decorLayer");
+
+    if (!layer) return;
+
+    const sectionIds = [
+      "home",
+      "gift",
+      "story",
+      "clock",
+      "memories",
+      "letter",
+      "cake",
+      "wish",
+      "love",
+      "games",
+      "surprise"
+    ];
+
+    const count = 66;
+
+    for (let i = 0; i < count; i++) {
+      const el = document.createElement("span");
+
+      const type = i % 6;
+
+      el.className = `deco deco-${type}`;
+
+      el.textContent =
+        this.symbols[i % this.symbols.length];
+
+      el.style.setProperty(
+        "--x",
+        `${(i * 37) % 96 + 2}%`
       );
 
-    if (!sections.length)
-      return;
+      el.style.setProperty(
+        "--y",
+        `${(i * 61) % 94 + 3}%`
+      );
 
-    sections.forEach(
-      (section, index) => {
-        this.decorateSection(
-          section,
-          index
-        );
-      }
-    );
+      el.style.setProperty(
+        "--delay",
+        `${(i % 12) * .35}s`
+      );
 
-    this.injectStyles();
-  },
+      el.style.setProperty(
+        "--duration",
+        `${4 + (i % 7)}s`
+      );
 
-  decorateSection(
-    section,
-    sectionIndex
-  ) {
-    if (
-      section.dataset
-        .decorated ===
-      "true"
-    ) {
-      return;
+      el.style.setProperty(
+        "--size",
+        `${8 + (i % 5) * 3}px`
+      );
+
+      el.dataset.section =
+        sectionIds[i % sectionIds.length];
+
+      layer.appendChild(el);
     }
-
-    section.dataset.decorated =
-      "true";
-
-    const fragment =
-      document.createDocumentFragment();
-
-    const count =
-      7;
-
-    for (
-      let i = 0;
-      i < count;
-      i++
-    ) {
-      const item =
-        document.createElement(
-          "span"
-        );
-
-      const className =
-        this.classes[
-          (
-            sectionIndex +
-            i
-          ) %
-          this.classes.length
-        ];
-
-      item.className =
-        `aesthetic-decor ${className}`;
-
-      item.textContent =
-        this.symbols[
-          (
-            sectionIndex *
-              3 +
-            i
-          ) %
-          this.symbols.length
-        ];
-
-      item.style.setProperty(
-        "--decor-x",
-        `${8 + Math.random() * 84}%`
-      );
-
-      item.style.setProperty(
-        "--decor-y",
-        `${5 + Math.random() * 90}%`
-      );
-
-      item.style.setProperty(
-        "--decor-delay",
-        `${Math.random() * 2.5}s`
-      );
-
-      item.style.setProperty(
-        "--decor-duration",
-        `${4 + Math.random() * 5}s`
-      );
-
-      item.style.setProperty(
-        "--decor-scale",
-        `${.65 + Math.random() * .75}`
-      );
-
-      fragment.appendChild(
-        item
-      );
-    }
-
-    section.appendChild(
-      fragment
-    );
-  },
-
-  injectStyles() {
-    if (
-      Utils.$(
-        "#aestheticDecorationStyles"
-      )
-    ) {
-      return;
-    }
-
-    const style =
-      document.createElement(
-        "style"
-      );
-
-    style.id =
-      "aestheticDecorationStyles";
-
-    style.textContent = `
-      section {
-        position: relative;
-        overflow: hidden;
-      }
-
-      .aesthetic-decor {
-        position: absolute;
-        left: var(--decor-x);
-        top: var(--decor-y);
-        z-index: 1;
-        pointer-events: none;
-        user-select: none;
-        opacity: .2;
-        transform:
-          translate(-50%,-50%)
-          scale(var(--decor-scale));
-        animation:
-          decorFloat
-          var(--decor-duration)
-          ease-in-out
-          var(--decor-delay)
-          infinite alternate;
-        filter:
-          drop-shadow(
-            0 0 9px
-            rgba(190,215,255,.28)
-          );
-      }
-
-      .decor-star {
-        color:
-          rgba(224,237,255,.8);
-        font-size: 18px;
-      }
-
-      .decor-sparkle {
-        color:
-          rgba(255,255,255,.85);
-        font-size: 13px;
-      }
-
-      .decor-heart {
-        color:
-          rgba(245,150,180,.58);
-        font-size: 17px;
-      }
-
-      .decor-diamond {
-        color:
-          rgba(190,214,255,.66);
-        font-size: 15px;
-      }
-
-      .decor-flower {
-        color:
-          rgba(226,191,211,.55);
-        font-size: 20px;
-      }
-
-      .decor-moon {
-        color:
-          rgba(235,224,188,.62);
-        font-size: 20px;
-      }
-
-      @keyframes decorFloat {
-        from {
-          transform:
-            translate(
-              -50%,
-              calc(-50% - 5px)
-            )
-            rotate(-4deg)
-            scale(
-              var(--decor-scale)
-            );
-        }
-
-        to {
-          transform:
-            translate(
-              -50%,
-              calc(-50% + 7px)
-            )
-            rotate(7deg)
-            scale(
-              var(--decor-scale)
-            );
-        }
-      }
-
-      section > *:not(
-        .aesthetic-decor
-      ) {
-        position: relative;
-        z-index: 2;
-      }
-    `;
-
-    document.head.appendChild(
-      style
-    );
   }
 };
 
+
 /* =========================================================
-   3D CAKE ENHANCEMENT
+   3D CAKE
+   AUTO ROTATE + DRAG + INTERACTIVE CANDLE
 ========================================================= */
 
-const CakeEnhancement = {
+const Cake3D = {
   cake: null,
-  rotationX: -7,
-  rotationY: -8,
-  autoRotation: 0,
+  candle: null,
+  flame: null,
   dragging: false,
   startX: 0,
-  startY: 0,
-  startRotationX: 0,
-  startRotationY: 0,
-  paused: false,
+  rotation: 0,
+  lastRotation: 0,
 
   init() {
-    this.findCake();
-
-    if (!this.cake) {
-      this.createFallbackCake();
-    }
+    this.cake = Utils.$(".cake");
+    this.candle = Utils.$(".cake-candle");
+    this.flame = Utils.$("#flame");
 
     if (!this.cake) return;
 
-    this.bind();
+    this.cake.classList.add("cake-3d-live");
 
-    this.injectStyles();
-
-    this.animate();
-  },
-
-  findCake() {
-    this.cake =
-      Utils.$(
-        "#cake3d"
-      ) ||
-      Utils.$(
-        ".cake-3d"
-      ) ||
-      Utils.$(
-        ".birthday-cake"
-      ) ||
-      Utils.$(
-        ".cake"
-      );
-  },
-
-  createFallbackCake() {
-    const section =
-      document.querySelector(
-        "#cake"
-      ) ||
-      document.querySelector(
-        "[data-cake-section]"
-      );
-
-    if (!section) return;
-
-    const wrapper =
-      document.createElement(
-        "div"
-      );
-
-    wrapper.className =
-      "cake-enhancement-wrapper";
-
-    wrapper.innerHTML = `
-      <div
-        class="cake-3d cake-generated"
-        id="cake3d"
-      >
-        <div class="cake-shadow"></div>
-
-        <div class="cake-body">
-          <div class="cake-top"></div>
-
-          <div class="cake-cream cream-one"></div>
-          <div class="cake-cream cream-two"></div>
-          <div class="cake-cream cream-three"></div>
-
-          <div class="cake-candle">
-            <div class="candle-wax"></div>
-            <div class="candle-flame" id="cakeFlame"></div>
-            <div class="candle-smoke" id="cakeSmoke"></div>
-          </div>
-        </div>
-
-        <div class="cake-decoration cake-decoration-one">✦</div>
-        <div class="cake-decoration cake-decoration-two">♡</div>
-        <div class="cake-decoration cake-decoration-three">✦</div>
-      </div>
-
-      <div class="cake-controls">
-        <button
-          type="button"
-          id="cakeRotateBtn"
-        >
-          Putar Kue
-        </button>
-
-        <button
-          type="button"
-          id="cakePauseBtn"
-        >
-          Jeda
-        </button>
-
-        <button
-          type="button"
-          id="cakeBlowBtn"
-        >
-          Tiup Lilin
-        </button>
-      </div>
-    `;
-
-    section.appendChild(
-      wrapper
-    );
-
-    this.cake =
-      wrapper.querySelector(
-        "#cake3d"
-      );
-  },
-
-  bind() {
-    if (!this.cake) return;
+    /*
+      Drag cake kiri / kanan
+    */
 
     this.cake.addEventListener(
       "pointerdown",
       event => {
         this.dragging = true;
 
-        this.startX =
-          event.clientX;
+        this.startX = event.clientX;
 
-        this.startY =
-          event.clientY;
-
-        this.startRotationX =
-          this.rotationX;
-
-        this.startRotationY =
-          this.rotationY;
+        this.lastRotation =
+          this.rotation;
 
         this.cake.setPointerCapture?.(
           event.pointerId
-        );
-
-        this.cake.classList.add(
-          "dragging"
         );
       }
     );
@@ -4423,816 +1951,115 @@ const CakeEnhancement = {
     this.cake.addEventListener(
       "pointermove",
       event => {
-        if (!this.dragging)
-          return;
+        if (!this.dragging) return;
 
-        const dx =
-          event.clientX -
-          this.startX;
-
-        const dy =
-          event.clientY -
-          this.startY;
-
-        this.rotationY =
-          this.startRotationY +
-          dx * .55;
-
-        this.rotationX =
-          Utils.clamp(
-            this.startRotationX -
-              dy * .35,
-            -28,
-            28
-          );
+        this.rotation =
+          this.lastRotation +
+          (event.clientX - this.startX) * .65;
 
         this.apply();
       }
     );
 
-    const release =
-      () => {
-        this.dragging = false;
+    const stop = () => {
+      this.dragging = false;
 
-        this.cake.classList.remove(
-          "dragging"
-        );
-      };
+      this.lastRotation =
+        this.rotation;
+    };
 
     this.cake.addEventListener(
       "pointerup",
-      release
+      stop
     );
 
     this.cake.addEventListener(
       "pointercancel",
-      release
+      stop
     );
 
-    Utils.$(
-      "#cakeRotateBtn"
-    )?.addEventListener(
-      "click",
+    this.cake.addEventListener(
+      "pointerleave",
       () => {
-        this.rotationY +=
-          90;
+        if (this.dragging) {
+          this.dragging = false;
+        }
+      }
+    );
+
+    /*
+      Double click = putar 180 derajat
+    */
+
+    this.cake.addEventListener(
+      "dblclick",
+      () => {
+        this.rotation += 180;
 
         this.apply();
       }
     );
 
-    Utils.$(
-      "#cakePauseBtn"
-    )?.addEventListener(
+    /*
+      Klik lilin = api membesar / kembali normal
+    */
+
+    this.candle?.addEventListener(
       "click",
       event => {
-        this.paused =
-          !this.paused;
+        event.stopPropagation();
 
-        event.currentTarget.textContent =
-          this.paused
-            ? "Lanjut"
-            : "Jeda";
+        const flame = this.flame;
+
+        if (!flame) return;
+
+        flame.classList.toggle(
+          "candle-big"
+        );
+
+        Toast.show(
+          flame.classList.contains(
+            "candle-big"
+          )
+            ? "Lilin nyala lebih terang ✦"
+            : "Lilin kembali normal."
+        );
       }
     );
 
-    Utils.$(
-      "#cakeBlowBtn"
-    )?.addEventListener(
-      "click",
-      () =>
-        this.toggleFlame()
-    );
-
-    Utils.$(
-      "#blowCandleBtn"
-    )?.addEventListener(
-      "click",
-      () =>
-        this.syncWithOriginalCake()
-    );
-  },
-
-  syncWithOriginalCake() {
-    const originalFlame =
-      Utils.$(
-        "#flame"
-      );
-
-    const generatedFlame =
-      Utils.$(
-        "#cakeFlame"
-      );
-
-    const generatedSmoke =
-      Utils.$(
-        "#cakeSmoke"
-      );
-
-    if (
-      !generatedFlame
-    ) {
-      return;
-    }
-
-    const off =
-      originalFlame?.classList.contains(
-        "off"
-      );
-
-    generatedFlame.classList.toggle(
-      "off",
-      Boolean(off)
-    );
-
-    generatedSmoke?.classList.toggle(
-      "active",
-      Boolean(off)
-    );
-  },
-
-  toggleFlame() {
-    const flame =
-      Utils.$(
-        "#cakeFlame"
-      );
-
-    const smoke =
-      Utils.$(
-        "#cakeSmoke"
-      );
-
-    const button =
-      Utils.$(
-        "#cakeBlowBtn"
-      );
-
-    if (!flame)
-      return;
-
-    const off =
-      flame.classList.toggle(
-        "off"
-      );
-
-    smoke?.classList.toggle(
-      "active",
-      off
-    );
-
-    button.textContent =
-      off
-        ? "Nyalakan Lilin"
-        : "Tiup Lilin";
-
-    Toast.show(
-      off
-        ? "Lilin sudah ditiup."
-        : "Lilin dinyalakan lagi."
-    );
+    this.animate();
   },
 
   apply() {
-    if (!this.cake)
-      return;
-
     this.cake.style.setProperty(
-      "--cake-rotate-x",
-      `${this.rotationX}deg`
-    );
-
-    this.cake.style.setProperty(
-      "--cake-rotate-y",
-      `${this.rotationY + this.autoRotation}deg`
+      "--cake-rotate",
+      `${this.rotation}deg`
     );
   },
 
   animate() {
-    if (
-      !this.paused &&
-      !this.dragging
-    ) {
-      this.autoRotation +=
-        .18;
-    }
+    if (!this.dragging) {
+      this.rotation += .035;
 
-    this.apply();
+      this.apply();
+    }
 
     requestAnimationFrame(
-      () =>
-        this.animate()
-    );
-  },
-
-  injectStyles() {
-    if (
-      Utils.$(
-        "#cakeEnhancementStyles"
-      )
-    ) {
-      return;
-    }
-
-    const style =
-      document.createElement(
-        "style"
-      );
-
-    style.id =
-      "cakeEnhancementStyles";
-
-    style.textContent = `
-      .cake-enhancement-wrapper {
-        position: relative;
-        width: min(
-          100%,
-          440px
-        );
-        margin:
-          28px auto;
-        display: grid;
-        place-items: center;
-        perspective:
-          1000px;
-        z-index: 4;
-      }
-
-      .cake-3d {
-        --cake-rotate-x: -7deg;
-        --cake-rotate-y: -8deg;
-
-        position: relative;
-        width: 250px;
-        height: 230px;
-        transform-style: preserve-3d;
-        transform:
-          rotateX(
-            var(--cake-rotate-x)
-          )
-          rotateY(
-            var(--cake-rotate-y)
-          );
-        cursor: grab;
-        touch-action: none;
-        transition:
-          filter .3s ease;
-      }
-
-      .cake-3d.dragging {
-        cursor: grabbing;
-        filter:
-          drop-shadow(
-            0 28px 35px
-            rgba(0,0,0,.32)
-          );
-      }
-
-      .cake-shadow {
-        position: absolute;
-        width: 210px;
-        height: 42px;
-        left: 20px;
-        bottom: 4px;
-        border-radius: 50%;
-        background:
-          rgba(0,0,0,.42);
-        filter: blur(14px);
-        transform:
-          translateZ(-35px);
-      }
-
-      .cake-body {
-        position: absolute;
-        left: 27px;
-        bottom: 25px;
-        width: 196px;
-        height: 126px;
-        border-radius:
-          22px 22px 34px 34px;
-        transform-style:
-          preserve-3d;
-        background:
-          linear-gradient(
-            145deg,
-            #6d3150,
-            #351d39 54%,
-            #17152c
-          );
-        box-shadow:
-          inset 0 10px 18px
-          rgba(255,255,255,.08),
-          inset 0 -14px 22px
-          rgba(0,0,0,.25),
-          0 25px 38px
-          rgba(0,0,0,.28);
-      }
-
-      .cake-top {
-        position: absolute;
-        left: -3px;
-        top: -22px;
-        width: 202px;
-        height: 56px;
-        border-radius: 50%;
-        background:
-          radial-gradient(
-            ellipse at 50% 40%,
-            #f7d8e2 0 12%,
-            #c77a98 13% 28%,
-            #75405d 29% 55%,
-            #38213c 56%
-          );
-        border:
-          3px solid
-          rgba(255,255,255,.1);
-        transform:
-          translateZ(18px);
-        box-shadow:
-          0 8px 15px
-          rgba(0,0,0,.2);
-      }
-
-      .cake-cream {
-        position: absolute;
-        width: 202px;
-        height: 21px;
-        left: -3px;
-        border-radius:
-          50%;
-        background:
-          linear-gradient(
-            180deg,
-            #f4d9e5,
-            #c58ba4
-          );
-        box-shadow:
-          inset 0 -5px 6px
-          rgba(74,28,51,.2);
-      }
-
-      .cream-one {
-        top: 21px;
-        transform:
-          translateZ(15px);
-      }
-
-      .cream-two {
-        top: 57px;
-        transform:
-          translateZ(11px);
-      }
-
-      .cream-three {
-        top: 92px;
-        transform:
-          translateZ(7px);
-      }
-
-      .cake-candle {
-        position: absolute;
-        left: 50%;
-        top: -83px;
-        width: 24px;
-        height: 83px;
-        transform:
-          translateX(-50%)
-          translateZ(24px);
-      }
-
-      .candle-wax {
-        position: absolute;
-        left: 4px;
-        bottom: 0;
-        width: 16px;
-        height: 62px;
-        border-radius:
-          9px 9px 5px 5px;
-        background:
-          repeating-linear-gradient(
-            90deg,
-            #f4e3e7 0 5px,
-            #d7b1bf 5px 8px
-          );
-        box-shadow:
-          inset -3px 0 4px
-          rgba(0,0,0,.12);
-      }
-
-      .candle-wax::before {
-        content: "";
-        position: absolute;
-        left: 7px;
-        top: -7px;
-        width: 3px;
-        height: 9px;
-        border-radius: 50%;
-        background:
-          #26202a;
-      }
-
-      .candle-flame {
-        position: absolute;
-        left: 50%;
-        top: -34px;
-        width: 18px;
-        height: 28px;
-        transform:
-          translateX(-50%)
-          rotate(2deg);
-        border-radius:
-          55% 45% 55% 45%;
-        background:
-          radial-gradient(
-            ellipse at 50% 72%,
-            #fff7ca 0 18%,
-            #ffd35d 19% 46%,
-            #ff8a42 47% 72%,
-            transparent 73%
-          );
-        filter:
-          drop-shadow(
-            0 0 11px
-            rgba(255,176,65,.85)
-          );
-        animation:
-          cakeFlame
-          .72s
-          ease-in-out
-          infinite alternate;
-        transform-origin:
-          50% 100%;
-      }
-
-      .candle-flame.off {
-        opacity: 0;
-        transform:
-          translateX(-50%)
-          translateY(8px)
-          scale(.2);
-        animation: none;
-      }
-
-      @keyframes cakeFlame {
-        0% {
-          transform:
-            translateX(-50%)
-            rotate(-5deg)
-            scaleY(.94);
-        }
-
-        50% {
-          transform:
-            translateX(-50%)
-            rotate(5deg)
-            scaleY(1.08);
-        }
-
-        100% {
-          transform:
-            translateX(-50%)
-            rotate(-2deg)
-            scaleY(.98);
-        }
-      }
-
-      .candle-smoke {
-        position: absolute;
-        left: 50%;
-        top: -42px;
-        width: 8px;
-        height: 8px;
-        opacity: 0;
-        border-radius: 50%;
-        background:
-          rgba(205,214,224,.28);
-        filter: blur(3px);
-      }
-
-      .candle-smoke.active {
-        opacity: 1;
-        animation:
-          cakeSmoke
-          2.4s
-          ease-out
-          forwards;
-      }
-
-      @keyframes cakeSmoke {
-        0% {
-          transform:
-            translate(
-              -50%,
-              12px
-            )
-            scale(.4);
-          opacity: .1;
-        }
-
-        35% {
-          opacity: .55;
-        }
-
-        100% {
-          transform:
-            translate(
-              calc(-50% + 14px),
-              -42px
-            )
-            scale(2.6);
-          opacity: 0;
-        }
-      }
-
-      .cake-decoration {
-        position: absolute;
-        z-index: 10;
-        color:
-          rgba(255,225,239,.82);
-        text-shadow:
-          0 0 14px
-          rgba(255,190,220,.7);
-        animation:
-          cakeDecorFloat
-          2.6s
-          ease-in-out
-          infinite alternate;
-      }
-
-      .cake-decoration-one {
-        left: 9px;
-        top: 15px;
-        font-size: 21px;
-      }
-
-      .cake-decoration-two {
-        right: 7px;
-        top: 54px;
-        font-size: 19px;
-        animation-delay: .5s;
-      }
-
-      .cake-decoration-three {
-        right: 22px;
-        bottom: 8px;
-        font-size: 14px;
-        animation-delay: 1s;
-      }
-
-      @keyframes cakeDecorFloat {
-        from {
-          transform:
-            translateY(0)
-            rotate(-5deg);
-        }
-
-        to {
-          transform:
-            translateY(-7px)
-            rotate(7deg);
-        }
-      }
-
-      .cake-controls {
-        position: relative;
-        z-index: 30;
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 8px;
-        margin-top: -2px;
-      }
-
-      .cake-controls button {
-        border:
-          1px solid
-          rgba(255,255,255,.12);
-        background:
-          rgba(255,255,255,.07);
-        color:
-          rgba(245,248,255,.9);
-        border-radius:
-          999px;
-        min-height: 39px;
-        padding:
-          8px 14px;
-        font:
-          inherit;
-        font-size: 11px;
-        cursor: pointer;
-        backdrop-filter:
-          blur(12px);
-        transition:
-          transform .2s ease,
-          background .2s ease;
-      }
-
-      .cake-controls button:active {
-        transform:
-          scale(.95);
-      }
-
-      .cake-controls button:hover {
-        background:
-          rgba(255,255,255,.13);
-      }
-
-      @media (max-width: 480px) {
-        .cake-3d {
-          transform:
-            scale(.88)
-            rotateX(
-              var(--cake-rotate-x)
-            )
-            rotateY(
-              var(--cake-rotate-y)
-            );
-        }
-      }
-    `;
-
-    document.head.appendChild(
-      style
+      () => this.animate()
     );
   }
 };
 
-/* =========================================================
-   SENDER NAME
-========================================================= */
+Cake3D.init();
 
-const SenderName = {
-  init() {
-    const replacements = [
-      "[Nama Pengirim]",
-      "Aku",
-      "Pengirim",
-      "Dari aku",
-      "dari aku",
-      "Dari: Aku",
-      "from me"
-    ];
-
-    const walker =
-      document.createTreeWalker(
-        document.body,
-        NodeFilter.SHOW_TEXT
-      );
-
-    const nodes = [];
-
-    while (
-      walker.nextNode()
-    ) {
-      nodes.push(
-        walker.currentNode
-      );
-    }
-
-    nodes.forEach(
-      node => {
-        let text =
-          node.nodeValue;
-
-        if (!text.trim())
-          return;
-
-        let changed = false;
-
-        replacements.forEach(
-          oldName => {
-            if (
-              text.includes(
-                oldName
-              )
-            ) {
-              text =
-                text.replaceAll(
-                  oldName,
-                  "Neng"
-                );
-
-              changed = true;
-            }
-          }
-        );
-
-        if (changed) {
-          node.nodeValue =
-            text;
-        }
-      }
-    );
-
-    Utils.$$(
-      "[data-sender]"
-    ).forEach(
-      element => {
-        element.textContent =
-          "Neng";
-      }
-    );
-
-    document.documentElement
-      .setAttribute(
-        "data-sender",
-        "Neng"
-      );
-  }
-};
 
 /* =========================================================
-   SHORTEN / NATURAL LANGUAGE TOUCH
-========================================================= */
-
-const NaturalText = {
-  replacements: [
-    [
-      "Selamat ulang tahun",
-      "Happy birthday"
-    ],
-    [
-      "Semoga di hari ulang tahunmu",
-      "Di hari kamu"
-    ],
-    [
-      "Pada kesempatan yang berbahagia ini",
-      "Hari ini"
-    ],
-    [
-      "Saya berharap",
-      "Aku harap"
-    ],
-    [
-      "Anda",
-      "kamu"
-    ],
-    [
-      "untukmu",
-      "buat kamu"
-    ],
-    [
-      "kepadamu",
-      "ke kamu"
-    ]
-  ],
-
-  init() {
-    Utils.$$(
-      "[data-natural]"
-    ).forEach(
-      element => {
-        let text =
-          element.textContent;
-
-        this.replacements.forEach(
-          ([from, to]) => {
-            text =
-              text.replaceAll(
-                from,
-                to
-              );
-          }
-        );
-
-        element.textContent =
-          text;
-      }
-    );
-  }
-};
-
-/* =========================================================
-   FINAL ENHANCEMENT BOOTSTRAP
-========================================================= */
-
-const Enhancement = {
-  init() {
-    PinLock.init();
-
-    SenderName.init();
-    NaturalText.init();
-
-    PageNavigation.init();
-    Decorations.init();
-
-    CakeEnhancement.init();
-  }
-};
-
-/* =========================================================
-   START APP
+   START
 ========================================================= */
 
 document.addEventListener(
   "DOMContentLoaded",
   () => {
     App.init();
-
-    setTimeout(
-      () => {
-        Enhancement.init();
-      },
-      120
-    );
   }
 );

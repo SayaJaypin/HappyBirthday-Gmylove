@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#071225">
   <meta name="description" content="A special interactive birthday gift made especially for Aa, M Gilang Ramadhan.">
   <meta property="og:title" content="For Aa, M Gilang Ramadhan — A Birthday Gift">
-  <meta property="og:description" content="A little digital birthday gift made with care, memories, wishes, and love.">
+  <meta property="og:description" content="A little digital birthday gift made with care, distance, memories, wishes, and love.">
   <meta property="og:type" content="website">
   <title>For Aa, M Gilang Ramadhan — A Birthday Gift</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='25' fill='%23071125'/%3E%3Cpath d='M50 78C23 62 18 46 27 35c7-9 18-9 23 0 5-9 16-9 23 0 9 11 4 27-23 43z' fill='%23d83d62'/%3E%3C/svg%3E">
@@ -16,7 +16,38 @@
   <link rel="stylesheet" href="style.css">
 </head>
 
-<body>
+<body class="locked">
+
+  <div id="pinGate" class="pin-gate" aria-modal="true" role="dialog">
+    <div class="pin-sparkle pin-sparkle-1">✦</div>
+    <div class="pin-sparkle pin-sparkle-2">♡</div>
+    <div class="pin-card">
+      <span class="eyebrow">A LITTLE SECRET</span>
+      <div class="pin-lock">♡</div>
+      <h2>Masukin PIN dulu</h2>
+      <p>Tekan tombolnya di layar ya.</p>
+      <div id="pinDots" class="pin-dots" aria-label="PIN progress">
+        <i></i><i></i><i></i><i></i><i></i><i></i>
+      </div>
+      <div id="pinError" class="pin-error" aria-live="polite"></div>
+      <div id="pinPad" class="pin-pad">
+        <button type="button" data-pin="1">1</button>
+        <button type="button" data-pin="2">2</button>
+        <button type="button" data-pin="3">3</button>
+        <button type="button" data-pin="4">4</button>
+        <button type="button" data-pin="5">5</button>
+        <button type="button" data-pin="6">6</button>
+        <button type="button" data-pin="7">7</button>
+        <button type="button" data-pin="8">8</button>
+        <button type="button" data-pin="9">9</button>
+        <button type="button" class="pin-clear" data-pin="clear">Clear</button>
+        <button type="button" data-pin="0">0</button>
+        <button type="button" class="pin-back" data-pin="back">⌫</button>
+      </div>
+      <small class="pin-note">private little door ✦</small>
+    </div>
+  </div>
+
 
   <div id="loader" class="loader">
     <div class="loader-inner">
@@ -25,21 +56,6 @@
       <div class="loader-line">
         <span id="loaderProgress"></span>
       </div>
-    </div>
-  </div>
-
-
-  <div id="pinGate" class="pin-gate" aria-modal="true" role="dialog">
-    <div class="pin-orbit orbit-a"></div><div class="pin-orbit orbit-b"></div>
-    <div class="pin-card">
-      <div class="pin-lock">✦</div>
-      <span class="eyebrow">PRIVATE LITTLE GIFT</span>
-      <h1>Masukin PIN dulu.</h1>
-      <p>Hadiah kecil ini cuma buat kamu.</p>
-      <div class="pin-dots" id="pinDots"><i></i><i></i><i></i><i></i><i></i><i></i></div>
-      <input id="pinInput" class="pin-input" inputmode="numeric" autocomplete="off" maxlength="6" placeholder="••••••" aria-label="PIN" />
-      <button id="pinSubmit" class="btn btn-primary pin-submit">Buka Hadiah</button>
-      <small id="pinError" class="pin-error">PIN belum benar.</small>
     </div>
   </div>
 
@@ -58,7 +74,7 @@
 
       <div class="opening-divider"></div>
 
-      <p class="opening-for">Dari Neng, untuk Aa</p>
+      <p class="opening-for">For Aa,</p>
       <h2>M Gilang Ramadhan</h2>
       <p class="opening-date">1 October</p>
 
@@ -94,14 +110,6 @@
     </audio>
 
     <main>
-      <div class="deco-cloud" aria-hidden="true">
-        <span>✦</span><span>✧</span><span>⋆</span><span>♡</span><span>✦</span><span>◇</span><span>✧</span><span>·</span><span>♡</span><span>✦</span>
-        <span>⋆</span><span>◇</span><span>✧</span><span>♡</span><span>✦</span><span>·</span><span>⋆</span><span>◇</span><span>♡</span><span>✧</span>
-        <span>✦</span><span>⋆</span><span>◇</span><span>♡</span><span>✧</span><span>·</span><span>✦</span><span>◇</span><span>⋆</span><span>♡</span>
-        <span>✧</span><span>✦</span><span>·</span><span>◇</span><span>♡</span><span>⋆</span><span>✧</span><span>✦</span><span>◇</span><span>♡</span>
-        <span>⋆</span><span>✧</span><span>✦</span><span>◇</span><span>·</span><span>♡</span><span>⋆</span><span>✧</span><span>✦</span><span>◇</span>
-        <span>♡</span><span>·</span><span>✧</span><span>⋆</span><span>◇</span><span>✦</span><span>♡</span><span>✧</span><span>·</span><span>⋆</span>
-      </div>
 
       <!-- HOME -->
       <section id="home" class="section hero-section">
@@ -140,9 +148,7 @@
           <span>SCROLL TO EXPLORE</span>
           <i></i>
         </div>
-      
-          <div class="section-next-wrap"><button class="section-next" data-next="gift"><span>Lanjut</span><b>↓</b></button></div>
-        </section>
+      </section>
 
       <!-- GIFT -->
       <section id="gift" class="section gift-section">
@@ -193,9 +199,7 @@
             </div>
           </div>
         </div>
-      
-          <div class="section-next-wrap"><button class="section-next" data-next="story"><span>Lanjut</span><b>↓</b></button></div>
-        </section>
+      </section>
 
       <!-- STORY -->
       <section id="story" class="section story-section">
@@ -271,9 +275,7 @@
             </p>
           </div>
         </div>
-      
-          <div class="section-next-wrap"><button class="section-next" data-next="clock"><span>Lanjut</span><b>↓</b></button></div>
-        </section>
+      </section>
 
       <!-- CLOCK -->
       <section id="clock" class="section clock-section">
@@ -339,9 +341,7 @@
             </div>
           </div>
         </div>
-      
-          <div class="section-next-wrap"><button class="section-next" data-next="memories"><span>Lanjut</span><b>↓</b></button></div>
-        </section>
+      </section>
 
       <!-- MEMORIES -->
       <section id="memories" class="section memories-section">
@@ -390,9 +390,7 @@
 
           <div id="galleryDots" class="gallery-dots" aria-label="Gallery pagination"></div>
         </div>
-      
-          <div class="section-next-wrap"><button class="section-next" data-next="letter"><span>Lanjut</span><b>↓</b></button></div>
-        </section>
+      </section>
 
       <!-- LETTER -->
       <section id="letter" class="section letter-section">
@@ -542,9 +540,7 @@
             </article>
           </div>
         </div>
-      
-          <div class="section-next-wrap"><button class="section-next" data-next="cake"><span>Lanjut</span><b>↓</b></button></div>
-        </section>
+      </section>
 
       <!-- CAKE -->
       <section id="cake" class="section cake-section">
@@ -587,19 +583,16 @@
               <span></span><span></span><span></span>
             </div>
 
-            <div class="cake-controls">
-              <button id="blowCandleBtn" class="btn btn-primary">Tiup Lilin</button>
-              <button id="cakeSpinBtn" class="btn btn-secondary">Putar Kue</button>
-            </div>
+            <button id="blowCandleBtn" class="btn btn-primary">
+              Make a Wish
+            </button>
 
             <p id="candleMessage" class="cake-message">
               Pejamkan mata sebentar. Pikirkan sesuatu yang kamu inginkan.
             </p>
           </div>
         </div>
-      
-          <div class="section-next-wrap"><button class="section-next" data-next="wish"><span>Lanjut</span><b>↓</b></button></div>
-        </section>
+      </section>
 
       <!-- WISH -->
       <section id="wish" class="section wish-section">
@@ -631,9 +624,7 @@
             untuk menjadi nyata.
           </p>
         </div>
-      
-          <div class="section-next-wrap"><button class="section-next" data-next="love"><span>Lanjut</span><b>↓</b></button></div>
-        </section>
+      </section>
 
       <!-- LOVE -->
       <section id="love" class="section love-section">
@@ -655,9 +646,7 @@
             </div>
           </div>
         </div>
-      
-          <div class="section-next-wrap"><button class="section-next" data-next="games"><span>Lanjut</span><b>↓</b></button></div>
-        </section>
+      </section>
 
       <!-- GAMES -->
       <section id="games" class="section games-section">
@@ -763,9 +752,7 @@
 
           </div>
         </div>
-      
-          <div class="section-next-wrap"><button class="section-next" data-next="surprise"><span>Lanjut</span><b>↓</b></button></div>
-        </section>
+      </section>
 
       <!-- SURPRISE -->
       <section id="surprise" class="section surprise-section">
@@ -846,6 +833,8 @@
       <a href="#love" data-section="love">Love</a>
       <a href="#games" data-section="games">Games</a>
       <a href="#surprise" data-section="surprise">Surprise</a>
+    <div id="decorLayer" class="decor-layer" aria-hidden="true"></div>
+
     </nav>
 
     <div id="toast" class="toast" role="status"></div>
