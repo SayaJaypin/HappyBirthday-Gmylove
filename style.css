@@ -2030,3 +2030,64 @@ section {
     transform: none;
   }
 }
+
+/* =========================================================
+   PREMIUM REVISION — PIN / PAGE FLOW / DECOR / 3D CAKE
+========================================================= */
+body.pin-locked .app { opacity:0 !important; visibility:hidden !important; }
+.pin-gate { position:fixed; inset:0; z-index:10000; display:grid; place-items:center; padding:24px; overflow:hidden; background:radial-gradient(circle at 50% 35%,rgba(40,94,170,.28),transparent 32%),#030812; transition:opacity .7s ease,transform .7s ease,visibility .7s; }
+.pin-gate.unlocked { opacity:0; visibility:hidden; transform:scale(1.04); pointer-events:none; }
+.pin-card { position:relative; width:min(390px,100%); padding:36px 26px 30px; text-align:center; border:1px solid rgba(255,255,255,.13); border-radius:30px; background:linear-gradient(145deg,rgba(255,255,255,.10),rgba(255,255,255,.035)); box-shadow:0 35px 100px rgba(0,0,0,.5),inset 0 1px rgba(255,255,255,.1); backdrop-filter:blur(24px); }
+.pin-card h1 { margin:14px 0 7px; font:600 clamp(2rem,9vw,3rem)/.95 var(--serif); letter-spacing:-.04em; }
+.pin-card p { margin:0 0 23px; color:var(--muted); font-size:.82rem; }
+.pin-lock { width:54px;height:54px;margin:0 auto 18px;display:grid;place-items:center;border-radius:18px;color:#dceaff;background:rgba(119,167,225,.12);border:1px solid rgba(170,205,245,.18);box-shadow:0 0 40px rgba(86,146,222,.15); }
+.pin-dots { display:flex;justify-content:center;gap:8px;margin:0 0 14px; }
+.pin-dots i { width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.12);transition:.25s; }
+.pin-dots i.filled { background:#dceaff;box-shadow:0 0 14px rgba(180,220,255,.55); }
+.pin-input { width:100%;height:58px;border:1px solid rgba(255,255,255,.12);border-radius:17px;background:rgba(0,0,0,.2);color:white;text-align:center;font-size:1.35rem;letter-spacing:.45em;outline:none;margin-bottom:12px; }
+.pin-input:focus { border-color:rgba(176,213,252,.45);box-shadow:0 0 0 4px rgba(102,159,220,.08); }
+.pin-submit { width:100%; }
+.pin-error { display:block;min-height:17px;margin-top:10px;color:#ff8da7;font-size:.68rem;opacity:0;transition:.2s; }
+.pin-error.show { opacity:1; }
+.pin-card.shake { animation:pinShake .42s ease; }
+@keyframes pinShake { 20%,60%{transform:translateX(-8px)} 40%,80%{transform:translateX(8px)} }
+.pin-orbit { position:absolute;border:1px solid rgba(154,196,240,.09);border-radius:50%;animation:orbitFloat 9s ease-in-out infinite; }
+.orbit-a{width:420px;height:420px}.orbit-b{width:650px;height:650px;animation-delay:-4s}
+@keyframes orbitFloat{50%{transform:rotate(18deg) scale(1.04)}}
+
+html { scroll-snap-type:y mandatory; }
+.section { min-height:100svh; scroll-snap-align:start; scroll-snap-stop:always; display:flex; align-items:center; padding:90px 0 125px; }
+.section > .container { width:min(1160px,calc(100% - 34px)); }
+.section-next-wrap { position:absolute; left:50%; bottom:30px; transform:translateX(-50%); z-index:10; }
+.section-next { display:flex;align-items:center;gap:10px;padding:10px 14px 10px 17px;border:1px solid rgba(255,255,255,.11);border-radius:999px;color:#bcd3ef;background:rgba(5,14,29,.65);backdrop-filter:blur(18px);box-shadow:0 14px 40px rgba(0,0,0,.22);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;transition:.3s; }
+.section-next b { width:25px;height:25px;display:grid;place-items:center;border-radius:50%;background:rgba(255,255,255,.09);animation:nextBounce 1.5s ease-in-out infinite; }
+.section-next:hover { transform:translateY(-3px);border-color:rgba(180,215,250,.3); }
+@keyframes nextBounce{50%{transform:translateY(3px)}}
+
+/* 60+ decorative objects: stars, hearts, diamonds and sparkles */
+.deco-cloud { position:fixed; inset:0; z-index:1; pointer-events:none; overflow:hidden; opacity:.55; }
+.deco-cloud span { position:absolute; color:rgba(177,211,247,.28); font-family:var(--serif); font-size:clamp(10px,2vw,22px); animation:decoFloat var(--d,8s) ease-in-out infinite; animation-delay:var(--delay,0s); }
+.deco-cloud span:nth-child(1){left:4%;top:12%;--d:7s}.deco-cloud span:nth-child(2){left:13%;top:31%;--d:9s}.deco-cloud span:nth-child(3){left:24%;top:9%;--d:6s}.deco-cloud span:nth-child(4){left:35%;top:22%;--d:10s}.deco-cloud span:nth-child(5){left:48%;top:8%;--d:7s}.deco-cloud span:nth-child(6){left:61%;top:18%;--d:11s}.deco-cloud span:nth-child(7){left:73%;top:7%;--d:8s}.deco-cloud span:nth-child(8){left:86%;top:26%;--d:6s}.deco-cloud span:nth-child(9){left:94%;top:13%;--d:10s}.deco-cloud span:nth-child(10){left:8%;top:58%;--d:8s}.deco-cloud span:nth-child(11){left:18%;top:72%;--d:12s}.deco-cloud span:nth-child(12){left:29%;top:48%;--d:7s}.deco-cloud span:nth-child(13){left:42%;top:64%;--d:9s}.deco-cloud span:nth-child(14){left:54%;top:52%;--d:6s}.deco-cloud span:nth-child(15){left:68%;top:70%;--d:11s}.deco-cloud span:nth-child(16){left:80%;top:55%;--d:8s}.deco-cloud span:nth-child(17){left:91%;top:72%;--d:10s}.deco-cloud span:nth-child(18){left:3%;top:86%;--d:7s}.deco-cloud span:nth-child(19){left:15%;top:91%;--d:9s}.deco-cloud span:nth-child(20){left:27%;top:82%;--d:11s}.deco-cloud span:nth-child(21){left:39%;top:94%;--d:6s}.deco-cloud span:nth-child(22){left:51%;top:86%;--d:8s}.deco-cloud span:nth-child(23){left:63%;top:92%;--d:10s}.deco-cloud span:nth-child(24){left:75%;top:84%;--d:7s}.deco-cloud span:nth-child(25){left:88%;top:94%;--d:9s}.deco-cloud span:nth-child(26){left:97%;top:43%;--d:6s}.deco-cloud span:nth-child(27){left:6%;top:40%;--d:10s}.deco-cloud span:nth-child(28){left:21%;top:57%;--d:8s}.deco-cloud span:nth-child(29){left:33%;top:35%;--d:12s}.deco-cloud span:nth-child(30){left:46%;top:42%;--d:7s}.deco-cloud span:nth-child(31){left:59%;top:34%;--d:9s}.deco-cloud span:nth-child(32){left:71%;top:44%;--d:11s}.deco-cloud span:nth-child(33){left:83%;top:37%;--d:8s}.deco-cloud span:nth-child(34){left:93%;top:51%;--d:6s}.deco-cloud span:nth-child(35){left:11%;top:18%;--d:10s}.deco-cloud span:nth-child(36){left:31%;top:13%;--d:7s}.deco-cloud span:nth-child(37){left:57%;top:12%;--d:9s}.deco-cloud span:nth-child(38){left:78%;top:16%;--d:11s}.deco-cloud span:nth-child(39){left:90%;top:34%;--d:8s}.deco-cloud span:nth-child(40){left:2%;top:68%;--d:6s}.deco-cloud span:nth-child(41){left:12%;top:48%;--d:9s}.deco-cloud span:nth-child(42){left:26%;top:66%;--d:12s}.deco-cloud span:nth-child(43){left:38%;top:76%;--d:7s}.deco-cloud span:nth-child(44){left:50%;top:61%;--d:10s}.deco-cloud span:nth-child(45){left:62%;top:76%;--d:8s}.deco-cloud span:nth-child(46){left:74%;top:62%;--d:6s}.deco-cloud span:nth-child(47){left:86%;top:80%;--d:11s}.deco-cloud span:nth-child(48){left:98%;top:90%;--d:9s}.deco-cloud span:nth-child(49){left:17%;top:3%;--d:7s}.deco-cloud span:nth-child(50){left:44%;top:27%;--d:10s}.deco-cloud span:nth-child(51){left:69%;top:29%;--d:8s}.deco-cloud span:nth-child(52){left:96%;top:61%;--d:12s}.deco-cloud span:nth-child(53){left:5%;top:28%;--d:6s}.deco-cloud span:nth-child(54){left:36%;top:55%;--d:9s}.deco-cloud span:nth-child(55){left:65%;top:57%;--d:11s}.deco-cloud span:nth-child(56){left:82%;top:69%;--d:7s}.deco-cloud span:nth-child(57){left:23%;top:93%;--d:10s}.deco-cloud span:nth-child(58){left:47%;top:97%;--d:8s}.deco-cloud span:nth-child(59){left:72%;top:96%;--d:6s}.deco-cloud span:nth-child(60){left:92%;top:88%;--d:12s}
+@keyframes decoFloat{0%,100%{transform:translate3d(0,0,0) rotate(0deg);opacity:.25}50%{transform:translate3d(0,-14px,0) rotate(12deg);opacity:.65}}
+
+/* cake: interactive 3D motion */
+.cake-stage { perspective:1100px; }
+.cake { transform:rotateX(10deg) rotateY(var(--cake-rotation,0deg)); transition:transform .25s ease; transform-style:preserve-3d; animation:cakeFloat 4.5s ease-in-out infinite; cursor:grab; touch-action:none; }
+.cake.dragging { cursor:grabbing; animation:none; }
+.cake.paused { animation:none; }
+@keyframes cakeFloat{0%,100%{transform:translateY(0) rotateX(10deg) rotateY(var(--cake-rotation,0deg))}50%{transform:translateY(-10px) rotateX(13deg) rotateY(calc(var(--cake-rotation,0deg) + 7deg))}}
+.cake-candle { transform-origin:50% 100%; animation:candleSway 1.8s ease-in-out infinite; }
+@keyframes candleSway{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(2deg) translateY(-2px)}}
+.flame:not(.off) { animation:flameDance .45s ease-in-out infinite alternate; transform-origin:50% 100%; }
+@keyframes flameDance{from{transform:scale(.88) rotate(-5deg);filter:brightness(.95); }to{transform:scale(1.12) rotate(6deg);filter:brightness(1.35);}}
+.cake-controls { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-top:8px; }
+.cake-controls .btn { min-width:130px; }
+
+@media (max-width:700px){
+  html { scroll-snap-type:y proximity; }
+  .section { padding:90px 0 115px; }
+  .section-next-wrap { bottom:23px; }
+  .deco-cloud { opacity:.38; }
+  .deco-cloud span { font-size:11px; }
+  .pin-card { padding:31px 20px 25px; }
+}

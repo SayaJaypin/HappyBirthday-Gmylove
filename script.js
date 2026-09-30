@@ -132,6 +132,7 @@ const Navigation = {
 
   init() {
     this.links = Utils.$$(".bottom-nav a");
+
     this.sections = this.links
       .map(link => document.getElementById(link.dataset.section))
       .filter(Boolean);
@@ -357,7 +358,9 @@ const Ambient = {
   animate() {
     if (!this.ctx) return;
 
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
 
     this.ctx.clearRect(0, 0, this.width, this.height);
 
@@ -370,9 +373,11 @@ const Ambient = {
           particle.x = Math.random() * this.width;
         }
 
-        const pulse = Math.sin(performance.now() * .001 + particle.phase) * .15;
+        const pulse =
+          Math.sin(performance.now() * .001 + particle.phase) * .15;
 
         this.ctx.beginPath();
+
         this.ctx.arc(
           particle.x,
           particle.y,
@@ -381,12 +386,18 @@ const Ambient = {
           Math.PI * 2
         );
 
-        this.ctx.fillStyle = `rgba(180,210,245,${Math.max(.02, particle.alpha + pulse)})`;
+        this.ctx.fillStyle =
+          `rgba(180,210,245,${Math.max(
+            .02,
+            particle.alpha + pulse
+          )})`;
+
         this.ctx.fill();
       }
     }
 
-    this.animation = requestAnimationFrame(() => this.animate());
+    this.animation =
+      requestAnimationFrame(() => this.animate());
   }
 };
 
@@ -440,7 +451,10 @@ const ClockManager = {
 
     Object.entries(values).forEach(([id, value]) => {
       const element = document.getElementById(id);
-      if (element) element.textContent = value;
+
+      if (element) {
+        element.textContent = value;
+      }
     });
   }
 };
@@ -463,6 +477,7 @@ const GiftAnimation = {
       if (opened) return;
 
       opened = true;
+
       box.classList.add("open");
       button.textContent = "Gift Opened";
       button.disabled = true;
@@ -507,7 +522,10 @@ const Gallery = {
       const dot = document.createElement("button");
 
       dot.type = "button";
-      dot.setAttribute("aria-label", `Go to photo ${index + 1}`);
+      dot.setAttribute(
+        "aria-label",
+        `Go to photo ${index + 1}`
+      );
 
       dot.addEventListener("click", () => {
         this.goTo(index);
@@ -516,21 +534,37 @@ const Gallery = {
       dotsContainer?.appendChild(dot);
     });
 
-    this.dots = dotsContainer ? Utils.$$("button", dotsContainer) : [];
+    this.dots = dotsContainer
+      ? Utils.$$("button", dotsContainer)
+      : [];
 
-    Utils.$(".gallery-prev")?.addEventListener("click", () => this.prev());
-    Utils.$(".gallery-next")?.addEventListener("click", () => this.next());
+    Utils.$(".gallery-prev")
+      ?.addEventListener("click", () => this.prev());
+
+    Utils.$(".gallery-next")
+      ?.addEventListener("click", () => this.next());
 
     const gallery = Utils.$("#gallery");
 
-    gallery?.addEventListener("touchstart", event => {
-      this.startX = event.changedTouches[0].screenX;
-    }, { passive: true });
+    gallery?.addEventListener(
+      "touchstart",
+      event => {
+        this.startX =
+          event.changedTouches[0].screenX;
+      },
+      { passive: true }
+    );
 
-    gallery?.addEventListener("touchend", event => {
-      this.endX = event.changedTouches[0].screenX;
-      this.handleSwipe();
-    }, { passive: true });
+    gallery?.addEventListener(
+      "touchend",
+      event => {
+        this.endX =
+          event.changedTouches[0].screenX;
+
+        this.handleSwipe();
+      },
+      { passive: true }
+    );
 
     this.render();
   },
@@ -548,12 +582,17 @@ const Gallery = {
   },
 
   next() {
-    this.index = (this.index + 1) % this.cards.length;
+    this.index =
+      (this.index + 1) % this.cards.length;
+
     this.render();
   },
 
   prev() {
-    this.index = (this.index - 1 + this.cards.length) % this.cards.length;
+    this.index =
+      (this.index - 1 + this.cards.length) %
+      this.cards.length;
+
     this.render();
   },
 
@@ -564,11 +603,17 @@ const Gallery = {
 
   render() {
     this.cards.forEach((card, index) => {
-      card.classList.toggle("active", index === this.index);
+      card.classList.toggle(
+        "active",
+        index === this.index
+      );
     });
 
     this.dots.forEach((dot, index) => {
-      dot.classList.toggle("active", index === this.index);
+      dot.classList.toggle(
+        "active",
+        index === this.index
+      );
     });
   }
 };
@@ -641,7 +686,8 @@ const Wish = {
     if (!input || !count || !button || !object) return;
 
     input.addEventListener("input", () => {
-      count.textContent = `${input.value.length} / 180`;
+      count.textContent =
+        `${input.value.length} / 180`;
     });
 
     button.addEventListener("click", () => {
@@ -705,12 +751,19 @@ const LoveAnimation = {
 
     const section = Utils.$("#love");
 
-    const observer = new IntersectionObserver(entries => {
-      if (entries.some(entry => entry.isIntersecting)) {
-        this.started = true;
-        observer.disconnect();
-      }
-    }, { threshold: .15 });
+    const observer = new IntersectionObserver(
+      entries => {
+        if (
+          entries.some(
+            entry => entry.isIntersecting
+          )
+        ) {
+          this.started = true;
+          observer.disconnect();
+        }
+      },
+      { threshold: .15 }
+    );
 
     section && observer.observe(section);
 
@@ -718,33 +771,63 @@ const LoveAnimation = {
   },
 
   resize() {
-    const rect = this.canvas.getBoundingClientRect();
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const rect =
+      this.canvas.getBoundingClientRect();
 
-    this.width = Math.max(rect.width, 300);
-    this.height = Math.max(rect.height, 350);
+    const dpr =
+      Math.min(
+        window.devicePixelRatio || 1,
+        2
+      );
 
-    this.canvas.width = this.width * dpr;
-    this.canvas.height = this.height * dpr;
+    this.width =
+      Math.max(rect.width, 300);
 
-    this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    this.height =
+      Math.max(rect.height, 350);
+
+    this.canvas.width =
+      this.width * dpr;
+
+    this.canvas.height =
+      this.height * dpr;
+
+    this.ctx.setTransform(
+      dpr,
+      0,
+      0,
+      dpr,
+      0,
+      0
+    );
   },
 
   createHeart() {
     const points = [];
-    const count = window.innerWidth < 600 ? 230 : 360;
+
+    const count =
+      window.innerWidth < 600
+        ? 230
+        : 360;
 
     for (let i = 0; i < count; i++) {
-      const t = Math.random() * Math.PI * 2;
+      const t =
+        Math.random() *
+        Math.PI *
+        2;
 
-      const x = 16 * Math.pow(Math.sin(t), 3);
+      const x =
+        16 *
+        Math.pow(Math.sin(t), 3);
+
       const y =
         13 * Math.cos(t) -
         5 * Math.cos(2 * t) -
         2 * Math.cos(3 * t) -
         Math.cos(4 * t);
 
-      const depth = Utils.random(-5, 5);
+      const depth =
+        Utils.random(-5, 5);
 
       points.push({
         x,
@@ -755,83 +838,171 @@ const LoveAnimation = {
 
     this.targetPoints = points;
 
-    this.particles = points.map(point => ({
-      x: Utils.random(-20, 20),
-      y: Utils.random(-20, 20),
-      z: Utils.random(-10, 10),
-      target: point,
-      progress: Math.random()
-    }));
+    this.particles =
+      points.map(point => ({
+        x: Utils.random(-20, 20),
+        y: Utils.random(-20, 20),
+        z: Utils.random(-10, 10),
+        target: point,
+        progress: Math.random()
+      }));
 
     this.lines = [];
 
-    for (let i = 0; i < this.particles.length; i++) {
+    for (
+      let i = 0;
+      i < this.particles.length;
+      i++
+    ) {
       const nearest = [];
 
-      for (let j = 0; j < this.particles.length; j++) {
+      for (
+        let j = 0;
+        j < this.particles.length;
+        j++
+      ) {
         if (i === j) continue;
 
-        const dx = this.particles[i].target.x - this.particles[j].target.x;
-        const dy = this.particles[i].target.y - this.particles[j].target.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
+        const dx =
+          this.particles[i].target.x -
+          this.particles[j].target.x;
+
+        const dy =
+          this.particles[i].target.y -
+          this.particles[j].target.y;
+
+        const distance =
+          Math.sqrt(
+            dx * dx +
+            dy * dy
+          );
 
         if (distance < 3.3) {
-          nearest.push({ j, distance });
+          nearest.push({
+            j,
+            distance
+          });
         }
       }
 
       nearest
-        .sort((a, b) => a.distance - b.distance)
+        .sort(
+          (a, b) =>
+            a.distance -
+            b.distance
+        )
         .slice(0, 2)
         .forEach(item => {
           if (i < item.j) {
-            this.lines.push([i, item.j]);
+            this.lines.push([
+              i,
+              item.j
+            ]);
           }
         });
     }
   },
 
   project(point) {
-    const scale = Math.min(this.width, this.height) / 42;
+    const scale =
+      Math.min(
+        this.width,
+        this.height
+      ) / 42;
 
     const angle = this.rotation;
+
     const cos = Math.cos(angle);
     const sin = Math.sin(angle);
 
-    const x = point.x * cos - point.z * sin;
-    const z = point.x * sin + point.z * cos;
+    const x =
+      point.x * cos -
+      point.z * sin;
 
-    const perspective = 1 + z / 55;
+    const z =
+      point.x * sin +
+      point.z * cos;
+
+    const perspective =
+      1 + z / 55;
 
     return {
-      x: this.width / 2 + x * scale * perspective,
-      y: this.height / 2 - point.y * scale * perspective * .92,
+      x:
+        this.width / 2 +
+        x *
+          scale *
+          perspective,
+
+      y:
+        this.height / 2 -
+        point.y *
+          scale *
+          perspective *
+          .92,
+
       depth: z
     };
   },
 
   animate() {
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduced =
+      window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+      ).matches;
 
-    this.ctx.clearRect(0, 0, this.width, this.height);
+    this.ctx.clearRect(
+      0,
+      0,
+      this.width,
+      this.height
+    );
 
     if (this.started) {
-      this.rotation += reduced ? 0 : .0025;
+      this.rotation +=
+        reduced
+          ? 0
+          : .0025;
     }
 
-    const points = this.particles.map(particle => {
-      particle.progress = Math.min(1, particle.progress + .006);
+    const points =
+      this.particles.map(
+        particle => {
+          particle.progress =
+            Math.min(
+              1,
+              particle.progress + .006
+            );
 
-      const eased = 1 - Math.pow(1 - particle.progress, 3);
+          const eased =
+            1 -
+            Math.pow(
+              1 - particle.progress,
+              3
+            );
 
-      const current = {
-        x: particle.x + (particle.target.x - particle.x) * eased,
-        y: particle.y + (particle.target.y - particle.y) * eased,
-        z: particle.z + (particle.target.z - particle.z) * eased
-      };
+          const current = {
+            x:
+              particle.x +
+              (particle.target.x -
+                particle.x) *
+                eased,
 
-      return this.project(current);
-    });
+            y:
+              particle.y +
+              (particle.target.y -
+                particle.y) *
+                eased,
+
+            z:
+              particle.z +
+              (particle.target.z -
+                particle.z) *
+                eased
+          };
+
+          return this.project(current);
+        }
+      );
 
     this.lines.forEach(([a, b]) => {
       const p1 = points[a];
@@ -839,36 +1010,65 @@ const LoveAnimation = {
 
       if (!p1 || !p2) return;
 
-      const alpha = Math.max(
-        0,
-        Math.min(.3, .3 - Math.abs(p1.depth - p2.depth) / 50)
-      );
+      const alpha =
+        Math.max(
+          0,
+          Math.min(
+            .3,
+            .3 -
+              Math.abs(
+                p1.depth -
+                p2.depth
+              ) / 50
+          )
+        );
 
       this.ctx.beginPath();
-      this.ctx.moveTo(p1.x, p1.y);
-      this.ctx.lineTo(p2.x, p2.y);
-      this.ctx.strokeStyle = `rgba(215,72,105,${alpha})`;
+
+      this.ctx.moveTo(
+        p1.x,
+        p1.y
+      );
+
+      this.ctx.lineTo(
+        p2.x,
+        p2.y
+      );
+
+      this.ctx.strokeStyle =
+        `rgba(215,72,105,${alpha})`;
+
       this.ctx.lineWidth = .7;
       this.ctx.stroke();
     });
 
     points.forEach(point => {
-      const alpha = .28 + (point.depth + 5) / 25;
+      const alpha =
+        .28 +
+        (point.depth + 5) /
+          25;
 
       this.ctx.beginPath();
+
       this.ctx.arc(
         point.x,
         point.y,
-        point.depth > 0 ? 1.35 : .8,
+        point.depth > 0
+          ? 1.35
+          : .8,
         0,
         Math.PI * 2
       );
 
-      this.ctx.fillStyle = `rgba(241,117,145,${alpha})`;
+      this.ctx.fillStyle =
+        `rgba(241,117,145,${alpha})`;
+
       this.ctx.fill();
     });
 
-    requestAnimationFrame(() => this.animate());
+    requestAnimationFrame(
+      () => this.animate()
+    );
   }
 };
 
@@ -877,7 +1077,34 @@ const LoveAnimation = {
 ========================================================= */
 
 const MathGame = {
-  questions: [],
+  questions: [
+    {
+      q: "5 + 7 = ?",
+      options: ["10", "11", "12", "13"],
+      answer: "12"
+    },
+    {
+      q: "9 × 3 = ?",
+      options: ["18", "21", "27", "30"],
+      answer: "27"
+    },
+    {
+      q: "20 - 8 = ?",
+      options: ["10", "11", "12", "14"],
+      answer: "12"
+    },
+    {
+      q: "36 ÷ 6 = ?",
+      options: ["5", "6", "7", "8"],
+      answer: "6"
+    },
+    {
+      q: "15 + 9 = ?",
+      options: ["22", "23", "24", "25"],
+      answer: "24"
+    }
+  ],
+
   current: 0,
   score: 0,
   locked: false,
@@ -886,98 +1113,115 @@ const MathGame = {
     this.buildQuestions();
     this.render();
 
-    Utils.$("#mathNext")?.addEventListener("click", () => {
-      this.next();
-    });
+    Utils.$("#mathNext")?.addEventListener(
+      "click",
+      () => this.next()
+    );
 
-    Utils.$("#mathRestart")?.addEventListener("click", () => {
-      this.restart();
-    });
+    Utils.$("#mathRestart")?.addEventListener(
+      "click",
+      () => this.restart()
+    );
   },
 
   buildQuestions() {
-    this.questions = Array.from({ length: 5 }, () => {
-      const type = Utils.randomInt(0, 3);
-
-      let a;
-      let b;
-      let answer;
-      let symbol;
-
-      if (type === 0) {
-        a = Utils.randomInt(3, 18);
-        b = Utils.randomInt(2, 15);
-        answer = a + b;
-        symbol = "+";
-      } else if (type === 1) {
-        a = Utils.randomInt(8, 25);
-        b = Utils.randomInt(2, a);
-        answer = a - b;
-        symbol = "−";
-      } else if (type === 2) {
-        a = Utils.randomInt(2, 10);
-        b = Utils.randomInt(2, 9);
-        answer = a * b;
-        symbol = "×";
-      } else {
-        b = Utils.randomInt(2, 8);
-        answer = Utils.randomInt(2, 10);
-        a = b * answer;
-        symbol = "÷";
+    this.questions = Utils.shuffle([
+      {
+        q: "5 + 7 = ?",
+        options: ["10", "11", "12", "13"],
+        answer: "12"
+      },
+      {
+        q: "9 × 3 = ?",
+        options: ["18", "21", "27", "30"],
+        answer: "27"
+      },
+      {
+        q: "20 - 8 = ?",
+        options: ["10", "11", "12", "14"],
+        answer: "12"
+      },
+      {
+        q: "36 ÷ 6 = ?",
+        options: ["5", "6", "7", "8"],
+        answer: "6"
+      },
+      {
+        q: "15 + 9 = ?",
+        options: ["22", "23", "24", "25"],
+        answer: "24"
+      },
+      {
+        q: "8 × 4 = ?",
+        options: ["24", "28", "32", "36"],
+        answer: "32"
+      },
+      {
+        q: "50 - 17 = ?",
+        options: ["31", "32", "33", "34"],
+        answer: "33"
       }
-
-      const options = new Set([answer]);
-
-      while (options.size < 4) {
-        options.add(
-          Math.max(0, answer + Utils.randomInt(-6, 6))
-        );
-      }
-
-      return {
-        question: `${a} ${symbol} ${b} = ?`,
-        answer,
-        options: Utils.shuffle([...options])
-      };
-    });
+    ]).slice(0, 5);
   },
 
   render() {
-    const progress = Utils.$("#mathProgress");
-    const score = Utils.$("#mathScore");
-    const question = Utils.$("#mathQuestion");
-    const options = Utils.$("#mathOptions");
-    const feedback = Utils.$("#mathFeedback");
-    const next = Utils.$("#mathNext");
+    const current =
+      this.questions[this.current];
 
-    if (!question || !options) return;
+    if (!current) return;
 
-    const current = this.questions[this.current];
+    const progress =
+      Utils.$("#mathProgress");
 
-    progress.textContent = `${this.current + 1} / ${this.questions.length}`;
-    score.textContent = this.score;
+    const question =
+      Utils.$("#mathQuestion");
 
-    question.textContent = current.question;
+    const options =
+      Utils.$("#mathOptions");
+
+    const feedback =
+      Utils.$("#mathFeedback");
+
+    const next =
+      Utils.$("#mathNext");
+
+    progress.textContent =
+      `${this.current + 1} / ${this.questions.length}`;
+
+    question.textContent =
+      current.q;
 
     options.innerHTML = "";
+
     feedback.textContent = "";
+
     next.classList.add("hidden");
 
     this.locked = false;
 
-    current.options.forEach(value => {
-      const button = document.createElement("button");
+    current.options.forEach(option => {
+      const button =
+        document.createElement("button");
 
-      button.className = "answer-btn";
-      button.textContent = value;
       button.type = "button";
+      button.className = "answer-btn";
+      button.textContent = option;
 
-      button.addEventListener("click", () => {
-        this.answer(value, button);
-      });
+      button.addEventListener(
+        "click",
+        () => {
+          this.answer(
+            option,
+            button
+          );
+        }
+      );
 
       options.appendChild(button);
     });
+
+    Utils.$("#mathScore").textContent =
+      this.score;
   },
 
   answer(value, clicked) {
@@ -985,31 +1229,59 @@ const MathGame = {
 
     this.locked = true;
 
-    const current = this.questions[this.current];
-    const buttons = Utils.$$(".answer-btn", Utils.$("#mathOptions"));
-    const feedback = Utils.$("#mathFeedback");
+    const current =
+      this.questions[this.current];
+
+    const buttons =
+      Utils.$$(".answer-btn");
+
+    const feedback =
+      Utils.$("#mathFeedback");
 
     buttons.forEach(button => {
       button.disabled = true;
 
-      if (Number(button.textContent) === current.answer) {
-        button.classList.add("correct");
+      if (
+        button.textContent ===
+        current.answer
+      ) {
+        button.classList.add(
+          "correct"
+        );
       }
     });
 
-    if (value === current.answer) {
+    if (
+      value === current.answer
+    ) {
       this.score++;
-      clicked.classList.add("correct");
-      feedback.textContent = "Correct. Nice one.";
+
+      clicked.classList.add(
+        "correct"
+      );
+
+      feedback.textContent =
+        "Benar. Nice one.";
     } else {
-      clicked.classList.add("wrong");
-      feedback.textContent = `The answer was ${current.answer}.`;
+      clicked.classList.add(
+        "wrong"
+      );
+
+      feedback.textContent =
+        `Jawabannya ${current.answer}.`;
     }
 
-    Utils.$("#mathScore").textContent = this.score;
+    Utils.$("#mathScore").textContent =
+      this.score;
 
-    if (this.current < this.questions.length - 1) {
-      Utils.$("#mathNext").classList.remove("hidden");
+    if (
+      this.current <
+      this.questions.length - 1
+    ) {
+      Utils.$("#mathNext")
+        .classList.remove(
+          "hidden"
+        );
     } else {
       this.finish();
     }
@@ -1018,7 +1290,10 @@ const MathGame = {
   next() {
     this.current++;
 
-    if (this.current >= this.questions.length) {
+    if (
+      this.current >=
+      this.questions.length
+    ) {
       this.finish();
       return;
     }
@@ -1027,32 +1302,55 @@ const MathGame = {
   },
 
   finish() {
-    const result = Utils.$("#mathResult");
-    const restart = Utils.$("#mathRestart");
-    const options = Utils.$("#mathOptions");
-    const next = Utils.$("#mathNext");
+    const result =
+      Utils.$("#mathResult");
 
-    next?.classList.add("hidden");
+    const restart =
+      Utils.$("#mathRestart");
+
+    const options =
+      Utils.$("#mathOptions");
+
+    const next =
+      Utils.$("#mathNext");
+
+    next?.classList.add(
+      "hidden"
+    );
+
     options.innerHTML = "";
 
     result.textContent =
-      `Final Score: ${this.score} / ${this.questions.length}`;
+      `Score kamu ${this.score} / ${this.questions.length}`;
 
-    result.classList.remove("hidden");
-    restart.classList.remove("hidden");
+    result.classList.remove(
+      "hidden"
+    );
+
+    restart.classList.remove(
+      "hidden"
+    );
   },
 
   restart() {
     this.current = 0;
     this.score = 0;
 
-    Utils.$("#mathResult").classList.add("hidden");
-    Utils.$("#mathRestart").classList.add("hidden");
+    Utils.$("#mathResult")
+      .classList.add(
+        "hidden"
+      );
+
+    Utils.$("#mathRestart")
+      .classList.add(
+        "hidden"
+      );
 
     this.buildQuestions();
     this.render();
   }
 };
+
 
 /* =========================================================
    STAR RUN
@@ -1073,30 +1371,61 @@ const StarRun = {
   lastTime: 0,
 
   init() {
-    this.canvas = Utils.$("#starCanvas");
+    this.canvas =
+      Utils.$("#starCanvas");
 
     if (!this.canvas) return;
 
-    this.ctx = this.canvas.getContext("2d");
+    this.ctx =
+      this.canvas.getContext("2d");
 
     if (!this.ctx) return;
 
-    this.best = Number(localStorage.getItem("aaStarBest") || 0);
-    Utils.$("#starBest").textContent = this.best;
+    this.best =
+      Number(
+        localStorage.getItem(
+          "aaStarBest"
+        ) || 0
+      );
 
-    Utils.$("#starStart")?.addEventListener("click", () => this.start());
-    Utils.$("#starJump")?.addEventListener("click", () => this.jump());
+    Utils.$("#starBest")
+      .textContent =
+      this.best;
 
-    this.canvas.addEventListener("pointerdown", () => {
-      if (this.running) this.jump();
-    });
+    Utils.$("#starStart")
+      ?.addEventListener(
+        "click",
+        () => this.start()
+      );
 
-    window.addEventListener("keydown", event => {
-      if (event.code === "Space" && this.running) {
-        event.preventDefault();
-        this.jump();
+    Utils.$("#starJump")
+      ?.addEventListener(
+        "click",
+        () => this.jump()
+      );
+
+    this.canvas.addEventListener(
+      "pointerdown",
+      () => {
+        if (this.running) {
+          this.jump();
+        }
       }
-    });
+    );
+
+    window.addEventListener(
+      "keydown",
+      event => {
+        if (
+          event.code ===
+          "Space" &&
+          this.running
+        ) {
+          event.preventDefault();
+          this.jump();
+        }
+      }
+    );
 
     this.reset();
   },
@@ -1117,6 +1446,12 @@ const StarRun = {
     this.spawnTimer = 0;
     this.starTimer = 0;
 
+    Utils.$("#starScore")
+      && (
+        Utils.$("#starScore")
+          .textContent = "0"
+      );
+
     this.draw();
   },
 
@@ -1124,273 +1459,593 @@ const StarRun = {
     if (this.running) return;
 
     this.reset();
+
     this.running = true;
 
-    Utils.$("#starOverlay")?.classList.add("hidden-overlay");
+    Utils.$("#starOverlay")
+      ?.classList.add(
+        "hidden-overlay"
+      );
 
-    this.lastTime = performance.now();
+    this.lastTime =
+      performance.now();
 
-    this.raf = requestAnimationFrame(time => this.loop(time));
+    this.raf =
+      requestAnimationFrame(
+        time => this.loop(time)
+      );
   },
 
   jump() {
     if (!this.running) return;
 
     if (this.player.grounded) {
-      this.player.velocityY = -480;
-      this.player.grounded = false;
+      this.player.velocityY =
+        -480;
+
+      this.player.grounded =
+        false;
     }
   },
 
   loop(time) {
     if (!this.running) return;
 
-    const delta = Math.min((time - this.lastTime) / 1000, .035);
+    const delta =
+      Math.min(
+        (time - this.lastTime) /
+          1000,
+        .035
+      );
+
     this.lastTime = time;
 
     this.update(delta);
     this.draw();
 
-    this.raf = requestAnimationFrame(nextTime => this.loop(nextTime));
+    this.raf =
+      requestAnimationFrame(
+        nextTime =>
+          this.loop(nextTime)
+      );
   },
 
   update(delta) {
     const gravity = 1250;
-    const ground = this.canvas.height - 55;
-    const speed = 230 + Math.min(this.score * 2.2, 160);
 
-    this.player.velocityY += gravity * delta;
-    this.player.y += this.player.velocityY * delta;
+    const ground =
+      this.canvas.height - 55;
 
-    if (this.player.y + this.player.height >= ground) {
-      this.player.y = ground - this.player.height;
+    const speed =
+      230 +
+      Math.min(
+        this.score * 2.2,
+        160
+      );
+
+    this.player.velocityY +=
+      gravity * delta;
+
+    this.player.y +=
+      this.player.velocityY *
+      delta;
+
+    if (
+      this.player.y +
+        this.player.height >=
+      ground
+    ) {
+      this.player.y =
+        ground -
+        this.player.height;
+
       this.player.velocityY = 0;
-      this.player.grounded = true;
+
+      this.player.grounded =
+        true;
     }
 
     this.spawnTimer += delta;
     this.starTimer += delta;
 
-    if (this.spawnTimer > Math.max(.75, 1.3 - this.score / 150)) {
+    if (
+      this.spawnTimer >
+      Math.max(
+        .75,
+        1.3 -
+          this.score / 150
+      )
+    ) {
       this.spawnTimer = 0;
 
       this.obstacles.push({
-        x: this.canvas.width + 30,
-        y: ground - Utils.randomInt(24, 62),
-        width: Utils.randomInt(20, 32),
-        height: Utils.randomInt(25, 65)
+        x:
+          this.canvas.width + 30,
+
+        y:
+          ground -
+          Utils.randomInt(
+            24,
+            62
+          ),
+
+        width:
+          Utils.randomInt(
+            20,
+            32
+          ),
+
+        height:
+          Utils.randomInt(
+            25,
+            65
+          )
       });
     }
 
-    if (this.starTimer > .9) {
+    if (
+      this.starTimer >
+      .9
+    ) {
       this.starTimer = 0;
 
       this.stars.push({
-        x: this.canvas.width + 20,
-        y: Utils.randomInt(100, ground - 90),
+        x:
+          this.canvas.width + 20,
+
+        y:
+          Utils.randomInt(
+            100,
+            ground - 90
+          ),
+
         radius: 7
       });
     }
 
-    this.obstacles.forEach(obstacle => {
-      obstacle.x -= speed * delta;
-    });
+    this.obstacles.forEach(
+      obstacle => {
+        obstacle.x -=
+          speed * delta;
+      }
+    );
 
-    this.stars.forEach(star => {
-      star.x -= speed * delta;
-    });
+    this.stars.forEach(
+      star => {
+        star.x -=
+          speed * delta;
+      }
+    );
 
-    this.obstacles = this.obstacles.filter(o => o.x > -60);
-    this.stars = this.stars.filter(s => s.x > -30);
+    this.obstacles =
+      this.obstacles.filter(
+        obstacle =>
+          obstacle.x > -60
+      );
 
-    for (const obstacle of this.obstacles) {
-      if (this.collision(this.player, obstacle)) {
+    this.stars =
+      this.stars.filter(
+        star =>
+          star.x > -30
+      );
+
+    for (
+      const obstacle
+      of this.obstacles
+    ) {
+      if (
+        this.collision(
+          this.player,
+          obstacle
+        )
+      ) {
         this.gameOver();
         return;
       }
     }
 
-    this.stars = this.stars.filter(star => {
-      if (this.circleCollision(this.player, star)) {
-        this.score++;
-        Utils.$("#starScore").textContent = this.score;
-        return false;
-      }
+    this.stars =
+      this.stars.filter(
+        star => {
+          if (
+            this.circleCollision(
+              this.player,
+              star
+            )
+          ) {
+            this.score++;
 
-      return true;
-    });
+            Utils.$("#starScore")
+              .textContent =
+              this.score;
+
+            return false;
+          }
+
+          return true;
+        }
+      );
   },
 
   collision(a, b) {
     return (
-      a.x < b.x + b.width &&
-      a.x + a.width > b.x &&
-      a.y < b.y + b.height &&
-      a.y + a.height > b.y
+      a.x <
+        b.x + b.width &&
+      a.x + a.width >
+        b.x &&
+      a.y <
+        b.y + b.height &&
+      a.y + a.height >
+        b.y
     );
   },
 
-  circleCollision(rect, circle) {
-    const nearestX = Utils.clamp(circle.x, rect.x, rect.x + rect.width);
-    const nearestY = Utils.clamp(circle.y, rect.y, rect.y + rect.height);
+  circleCollision(
+    rect,
+    circle
+  ) {
+    const nearestX =
+      Utils.clamp(
+        circle.x,
+        rect.x,
+        rect.x +
+          rect.width
+      );
 
-    const dx = circle.x - nearestX;
-    const dy = circle.y - nearestY;
+    const nearestY =
+      Utils.clamp(
+        circle.y,
+        rect.y,
+        rect.y +
+          rect.height
+      );
 
-    return dx * dx + dy * dy < circle.radius * circle.radius;
+    const dx =
+      circle.x -
+      nearestX;
+
+    const dy =
+      circle.y -
+      nearestY;
+
+    return (
+      dx * dx +
+      dy * dy <
+      circle.radius *
+        circle.radius
+    );
   },
 
   draw() {
     const ctx = this.ctx;
-    const width = this.canvas.width;
-    const height = this.canvas.height;
 
-    ctx.clearRect(0, 0, width, height);
+    const width =
+      this.canvas.width;
 
-    const gradient = ctx.createLinearGradient(0, 0, 0, height);
-    gradient.addColorStop(0, "#07152b");
-    gradient.addColorStop(1, "#030914");
+    const height =
+      this.canvas.height;
 
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, width, height);
+    ctx.clearRect(
+      0,
+      0,
+      width,
+      height
+    );
 
-    /* stars in background */
-    for (let i = 0; i < 25; i++) {
-      const x = (i * 83) % width;
-      const y = (i * 47) % (height * .65);
+    const gradient =
+      ctx.createLinearGradient(
+        0,
+        0,
+        0,
+        height
+      );
+
+    gradient.addColorStop(
+      0,
+      "#07152b"
+    );
+
+    gradient.addColorStop(
+      1,
+      "#030914"
+    );
+
+    ctx.fillStyle =
+      gradient;
+
+    ctx.fillRect(
+      0,
+      0,
+      width,
+      height
+    );
+
+    for (
+      let i = 0;
+      i < 25;
+      i++
+    ) {
+      const x =
+        (i * 83) %
+        width;
+
+      const y =
+        (i * 47) %
+        (height * .65);
 
       ctx.beginPath();
-      ctx.arc(x, y, i % 3 === 0 ? 1.2 : .7, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(210,230,255,.35)";
+
+      ctx.arc(
+        x,
+        y,
+        i % 3 === 0
+          ? 1.2
+          : .7,
+        0,
+        Math.PI * 2
+      );
+
+      ctx.fillStyle =
+        "rgba(210,230,255,.35)";
+
       ctx.fill();
     }
 
-    const ground = height - 55;
+    const ground =
+      height - 55;
 
-    ctx.fillStyle = "rgba(120,160,205,.12)";
-    ctx.fillRect(0, ground, width, 1);
+    ctx.fillStyle =
+      "rgba(120,160,205,.12)";
 
-    /* player */
+    ctx.fillRect(
+      0,
+      ground,
+      width,
+      1
+    );
+
     ctx.save();
+
     ctx.translate(
-      this.player.x + this.player.width / 2,
-      this.player.y + this.player.height / 2
+      this.player.x +
+        this.player.width / 2,
+      this.player.y +
+        this.player.height / 2
     );
 
     ctx.rotate(
-      this.player.grounded ? 0 : this.player.velocityY * .001
+      this.player.grounded
+        ? 0
+        : this.player.velocityY *
+          .001
     );
 
     ctx.beginPath();
-    ctx.arc(0, 0, 14, 0, Math.PI * 2);
-    ctx.fillStyle = "#dceaff";
+
+    ctx.arc(
+      0,
+      0,
+      14,
+      0,
+      Math.PI * 2
+    );
+
+    ctx.fillStyle =
+      "#dceaff";
+
     ctx.fill();
 
     ctx.beginPath();
-    ctx.arc(-4, -3, 2, 0, Math.PI * 2);
-    ctx.arc(4, -3, 2, 0, Math.PI * 2);
-    ctx.fillStyle = "#071225";
+
+    ctx.arc(
+      -4,
+      -3,
+      2,
+      0,
+      Math.PI * 2
+    );
+
+    ctx.arc(
+      4,
+      -3,
+      2,
+      0,
+      Math.PI * 2
+    );
+
+    ctx.fillStyle =
+      "#071225";
+
     ctx.fill();
 
     ctx.beginPath();
+
     ctx.moveTo(-5, 5);
-    ctx.quadraticCurveTo(0, 9, 5, 5);
-    ctx.strokeStyle = "#071225";
+
+    ctx.quadraticCurveTo(
+      0,
+      9,
+      5,
+      5
+    );
+
+    ctx.strokeStyle =
+      "#071225";
+
     ctx.lineWidth = 1.5;
+
     ctx.stroke();
 
     ctx.restore();
 
-    /* obstacles */
-    this.obstacles.forEach(obstacle => {
-      const gradient = ctx.createLinearGradient(
-        obstacle.x,
-        obstacle.y,
-        obstacle.x + obstacle.width,
-        obstacle.y + obstacle.height
-      );
+    this.obstacles.forEach(
+      obstacle => {
+        const gradient =
+          ctx.createLinearGradient(
+            obstacle.x,
+            obstacle.y,
+            obstacle.x +
+              obstacle.width,
+            obstacle.y +
+              obstacle.height
+          );
 
-      gradient.addColorStop(0, "#6f3150");
-      gradient.addColorStop(1, "#2d1731");
+        gradient.addColorStop(
+          0,
+          "#6f3150"
+        );
 
-      ctx.fillStyle = gradient;
-      ctx.beginPath();
-      ctx.roundRect(
-        obstacle.x,
-        obstacle.y,
-        obstacle.width,
-        obstacle.height,
-        6
-      );
-      ctx.fill();
-    });
+        gradient.addColorStop(
+          1,
+          "#2d1731"
+        );
 
-    /* collectible stars */
-    this.stars.forEach(star => {
-      this.drawStar(
-        ctx,
-        star.x,
-        star.y,
-        star.radius,
-        "#d8e9ff"
-      );
-    });
+        ctx.fillStyle =
+          gradient;
+
+        ctx.beginPath();
+
+        ctx.roundRect(
+          obstacle.x,
+          obstacle.y,
+          obstacle.width,
+          obstacle.height,
+          6
+        );
+
+        ctx.fill();
+      }
+    );
+
+    this.stars.forEach(
+      star => {
+        this.drawStar(
+          ctx,
+          star.x,
+          star.y,
+          star.radius,
+          "#d8e9ff"
+        );
+      }
+    );
   },
 
-  drawStar(ctx, x, y, radius, color) {
+  drawStar(
+    ctx,
+    x,
+    y,
+    radius,
+    color
+  ) {
     ctx.save();
-    ctx.translate(x, y);
+
+    ctx.translate(
+      x,
+      y
+    );
+
     ctx.beginPath();
 
-    for (let i = 0; i < 10; i++) {
-      const angle = -Math.PI / 2 + i * Math.PI / 5;
-      const r = i % 2 === 0 ? radius : radius * .42;
+    for (
+      let i = 0;
+      i < 10;
+      i++
+    ) {
+      const angle =
+        -Math.PI / 2 +
+        i * Math.PI / 5;
 
-      const px = Math.cos(angle) * r;
-      const py = Math.sin(angle) * r;
+      const r =
+        i % 2 === 0
+          ? radius
+          : radius * .42;
 
-      if (i === 0) ctx.moveTo(px, py);
-      else ctx.lineTo(px, py);
+      const px =
+        Math.cos(angle) * r;
+
+      const py =
+        Math.sin(angle) * r;
+
+      if (i === 0) {
+        ctx.moveTo(
+          px,
+          py
+        );
+      } else {
+        ctx.lineTo(
+          px,
+          py
+        );
+      }
     }
 
     ctx.closePath();
-    ctx.fillStyle = color;
-    ctx.shadowColor = color;
+
+    ctx.fillStyle =
+      color;
+
+    ctx.shadowColor =
+      color;
+
     ctx.shadowBlur = 10;
+
     ctx.fill();
+
     ctx.restore();
   },
 
   gameOver() {
     this.running = false;
 
-    cancelAnimationFrame(this.raf);
+    cancelAnimationFrame(
+      this.raf
+    );
 
-    if (this.score > this.best) {
-      this.best = this.score;
+    if (
+      this.score >
+      this.best
+    ) {
+      this.best =
+        this.score;
 
       try {
-        localStorage.setItem("aaStarBest", String(this.best));
+        localStorage.setItem(
+          "aaStarBest",
+          String(this.best)
+        );
       } catch {}
 
-      Utils.$("#starBest").textContent = this.best;
+      Utils.$("#starBest")
+        .textContent =
+        this.best;
     }
 
-    const overlay = Utils.$("#starOverlay");
+    const overlay =
+      Utils.$("#starOverlay");
 
     overlay.innerHTML = `
       <h4>Run Complete</h4>
-      <p>You collected ${this.score} star${this.score === 1 ? "" : "s"}.</p>
-      <button id="starRestart" class="btn btn-primary">Run Again</button>
+      <p>Kamu dapat ${this.score} bintang.</p>
+      <button
+        id="starRestart"
+        class="btn btn-primary"
+      >
+        Main Lagi
+      </button>
     `;
 
-    overlay.classList.remove("hidden-overlay");
+    overlay.classList.remove(
+      "hidden-overlay"
+    );
 
-    Utils.$("#starRestart")?.addEventListener("click", () => {
-      this.start();
-    });
+    Utils.$("#starRestart")
+      ?.addEventListener(
+        "click",
+        () => this.start()
+      );
   }
 };
+
 
 /* =========================================================
    ENGLISH GAME
@@ -1400,43 +2055,79 @@ const EnglishGame = {
   questions: [
     {
       q: 'What is the opposite of "big"?',
-      options: ["Small", "Long", "Tall", "Fast"],
+      options: [
+        "Small",
+        "Long",
+        "Tall",
+        "Fast"
+      ],
       answer: "Small"
     },
     {
       q: 'What does "happy" mean?',
-      options: ["Senang", "Marah", "Lapar", "Lelah"],
+      options: [
+        "Senang",
+        "Marah",
+        "Lapar",
+        "Lelah"
+      ],
       answer: "Senang"
     },
     {
-      q: 'Choose the correct word: "I ___ a student."',
-      options: ["am", "is", "are", "be"],
+      q:
+        'Choose the correct word: "I ___ a student."',
+      options: [
+        "am",
+        "is",
+        "are",
+        "be"
+      ],
       answer: "am"
     },
     {
-      q: 'What is the opposite of "hot"?',
-      options: ["Cold", "High", "Fast", "Hard"],
+      q:
+        'What is the opposite of "hot"?',
+      options: [
+        "Cold",
+        "High",
+        "Fast",
+        "Hard"
+      ],
       answer: "Cold"
     },
     {
-      q: 'Which one is a color?',
-      options: ["Blue", "Chair", "Water", "Run"],
+      q:
+        "Which one is a color?",
+      options: [
+        "Blue",
+        "Chair",
+        "Water",
+        "Run"
+      ],
       answer: "Blue"
     },
     {
-      q: 'What does "beautiful" mean?',
-      options: ["Indah", "Cepat", "Kecil", "Keras"],
+      q:
+        'What does "beautiful" mean?',
+      options: [
+        "Indah",
+        "Cepat",
+        "Kecil",
+        "Keras"
+      ],
       answer: "Indah"
     },
     {
-      q: 'Choose the correct sentence.',
+      q:
+        "Choose the correct sentence.",
       options: [
         "She is happy.",
         "She are happy.",
         "She am happy.",
         "She be happy."
       ],
-      answer: "She is happy."
+      answer:
+        "She is happy."
     }
   ],
 
@@ -1446,88 +2137,170 @@ const EnglishGame = {
   activeQuestions: [],
 
   init() {
-    this.activeQuestions = Utils.shuffle(this.questions).slice(0, 5);
+    this.activeQuestions =
+      Utils.shuffle(
+        this.questions
+      ).slice(0, 5);
 
     this.render();
 
-    Utils.$("#englishNext")?.addEventListener("click", () => {
-      this.next();
-    });
+    Utils.$("#englishNext")
+      ?.addEventListener(
+        "click",
+        () => this.next()
+      );
 
-    Utils.$("#englishRestart")?.addEventListener("click", () => {
-      this.restart();
-    });
+    Utils.$("#englishRestart")
+      ?.addEventListener(
+        "click",
+        () => this.restart()
+      );
   },
 
   render() {
-    const current = this.activeQuestions[this.current];
+    const current =
+      this.activeQuestions[
+        this.current
+      ];
 
     if (!current) return;
 
-    const progress = Utils.$("#englishProgress");
-    const question = Utils.$("#englishQuestion");
-    const options = Utils.$("#englishOptions");
-    const feedback = Utils.$("#englishFeedback");
-    const next = Utils.$("#englishNext");
+    const progress =
+      Utils.$("#englishProgress");
+
+    const question =
+      Utils.$("#englishQuestion");
+
+    const options =
+      Utils.$("#englishOptions");
+
+    const feedback =
+      Utils.$("#englishFeedback");
+
+    const next =
+      Utils.$("#englishNext");
 
     progress.textContent =
       `${this.current + 1} / ${this.activeQuestions.length}`;
 
-    question.textContent = current.q;
+    question.textContent =
+      current.q;
 
     options.innerHTML = "";
+
     feedback.textContent = "";
-    next.classList.add("hidden");
+
+    next.classList.add(
+      "hidden"
+    );
 
     this.locked = false;
 
-    current.options.forEach(option => {
-      const button = document.createElement("button");
+    current.options.forEach(
+      option => {
+        const button =
+          document.createElement(
+            "button"
+          );
 
-      button.type = "button";
-      button.className = "answer-btn";
-      button.textContent = option;
+        button.type =
+          "button";
 
-      button.addEventListener("click", () => {
-        this.answer(option, button);
-      });
+        button.className =
+          "answer-btn";
 
-      options.appendChild(button);
-    });
+        button.textContent =
+          option;
 
-    Utils.$("#englishScore").textContent = this.score;
+        button.addEventListener(
+          "click",
+          () => {
+            this.answer(
+              option,
+              button
+            );
+          }
+        );
+
+        options.appendChild(
+          button
+        );
+      }
+    );
+
+    Utils.$("#englishScore")
+      .textContent =
+      this.score;
   },
 
-  answer(value, clicked) {
+  answer(
+    value,
+    clicked
+  ) {
     if (this.locked) return;
 
     this.locked = true;
 
-    const current = this.activeQuestions[this.current];
-    const buttons = Utils.$$(".answer-btn", Utils.$("#englishOptions"));
-    const feedback = Utils.$("#englishFeedback");
+    const current =
+      this.activeQuestions[
+        this.current
+      ];
 
-    buttons.forEach(button => {
-      button.disabled = true;
+    const buttons =
+      Utils.$$(".answer-btn");
 
-      if (button.textContent === current.answer) {
-        button.classList.add("correct");
+    const feedback =
+      Utils.$("#englishFeedback");
+
+    buttons.forEach(
+      button => {
+        button.disabled = true;
+
+        if (
+          button.textContent ===
+          current.answer
+        ) {
+          button.classList.add(
+            "correct"
+          );
+        }
       }
-    });
+    );
 
-    if (value === current.answer) {
+    if (
+      value ===
+      current.answer
+    ) {
       this.score++;
-      clicked.classList.add("correct");
-      feedback.textContent = "Correct. Well done.";
+
+      clicked.classList.add(
+        "correct"
+      );
+
+      feedback.textContent =
+        "Benar. Nice one.";
     } else {
-      clicked.classList.add("wrong");
-      feedback.textContent = `Correct answer: ${current.answer}`;
+      clicked.classList.add(
+        "wrong"
+      );
+
+      feedback.textContent =
+        `Jawabannya ${current.answer}`;
     }
 
-    Utils.$("#englishScore").textContent = this.score;
+    Utils.$("#englishScore")
+      .textContent =
+      this.score;
 
-    if (this.current < this.activeQuestions.length - 1) {
-      Utils.$("#englishNext").classList.remove("hidden");
+    if (
+      this.current <
+      this.activeQuestions.length -
+        1
+    ) {
+      Utils.$("#englishNext")
+        .classList.remove(
+          "hidden"
+        );
     } else {
       this.finish();
     }
@@ -1536,7 +2309,10 @@ const EnglishGame = {
   next() {
     this.current++;
 
-    if (this.current >= this.activeQuestions.length) {
+    if (
+      this.current >=
+      this.activeQuestions.length
+    ) {
       this.finish();
       return;
     }
@@ -1545,30 +2321,55 @@ const EnglishGame = {
   },
 
   finish() {
-    Utils.$("#englishOptions").innerHTML = "";
-    Utils.$("#englishNext").classList.add("hidden");
+    Utils.$("#englishOptions")
+      .innerHTML = "";
 
-    const result = Utils.$("#englishResult");
-    const restart = Utils.$("#englishRestart");
+    Utils.$("#englishNext")
+      .classList.add(
+        "hidden"
+      );
+
+    const result =
+      Utils.$("#englishResult");
+
+    const restart =
+      Utils.$("#englishRestart");
 
     result.textContent =
-      `Final Score: ${this.score} / ${this.activeQuestions.length}`;
+      `Score kamu ${this.score} / ${this.activeQuestions.length}`;
 
-    result.classList.remove("hidden");
-    restart.classList.remove("hidden");
+    result.classList.remove(
+      "hidden"
+    );
+
+    restart.classList.remove(
+      "hidden"
+    );
   },
 
   restart() {
     this.current = 0;
     this.score = 0;
-    this.activeQuestions = Utils.shuffle(this.questions).slice(0, 5);
 
-    Utils.$("#englishResult").classList.add("hidden");
-    Utils.$("#englishRestart").classList.add("hidden");
+    this.activeQuestions =
+      Utils.shuffle(
+        this.questions
+      ).slice(0, 5);
+
+    Utils.$("#englishResult")
+      .classList.add(
+        "hidden"
+      );
+
+    Utils.$("#englishRestart")
+      .classList.add(
+        "hidden"
+      );
 
     this.render();
   }
 };
+
 
 /* =========================================================
    SURPRISE
@@ -1578,85 +2379,661 @@ const Surprise = {
   opened: false,
 
   init() {
-    const button = Utils.$("#surpriseBtn");
-    const before = Utils.$("#surpriseBefore");
-    const reveal = Utils.$("#surpriseReveal");
+    const button =
+      Utils.$("#surpriseBtn");
 
-    if (!button || !before || !reveal) return;
+    const before =
+      Utils.$("#surpriseBefore");
 
-    button.addEventListener("click", () => {
-      if (this.opened) return;
+    const reveal =
+      Utils.$("#surpriseReveal");
 
-      this.opened = true;
+    if (
+      !button ||
+      !before ||
+      !reveal
+    ) {
+      return;
+    }
 
-      before.style.opacity = "0";
-      before.style.transform = "scale(.96)";
-      before.style.transition = "opacity .7s, transform .7s";
+    button.addEventListener(
+      "click",
+      () => {
+        if (this.opened) return;
 
-      setTimeout(() => {
-        before.style.display = "none";
-        reveal.classList.add("active");
+        this.opened = true;
 
-        this.fireParticles();
+        before.style.opacity = "0";
 
-        AudioManager.tryPlay();
-      }, 750);
-    });
+        before.style.transform =
+          "scale(.96)";
+
+        before.style.transition =
+          "opacity .7s, transform .7s";
+
+        setTimeout(() => {
+          before.style.display =
+            "none";
+
+          reveal.classList.add(
+            "active"
+          );
+
+          this.fireParticles();
+
+          AudioManager.tryPlay();
+        }, 750);
+      }
+    );
   },
 
   fireParticles() {
-    const section = Utils.$("#surprise");
+    const section =
+      Utils.$("#surprise");
 
     if (!section) return;
 
-    for (let i = 0; i < 35; i++) {
-      const particle = document.createElement("span");
+    for (
+      let i = 0;
+      i < 35;
+      i++
+    ) {
+      const particle =
+        document.createElement(
+          "span"
+        );
 
-      particle.style.position = "absolute";
-      particle.style.left = `${Math.random() * 100}%`;
-      particle.style.top = `${60 + Math.random() * 30}%`;
-      particle.style.width = `${Math.random() * 3 + 1}px`;
-      particle.style.height = particle.style.width;
-      particle.style.borderRadius = "50%";
-      particle.style.background = "rgba(205,225,250,.8)";
-      particle.style.boxShadow = "0 0 12px rgba(160,200,245,.8)";
-      particle.style.pointerEvents = "none";
-      particle.style.zIndex = "1";
+      particle.style.position =
+        "absolute";
 
-      section.appendChild(particle);
+      particle.style.left =
+        `${Math.random() * 100}%`;
 
-      const duration = 1500 + Math.random() * 1800;
+      particle.style.top =
+        `${60 + Math.random() * 30}%`;
+
+      particle.style.width =
+        `${Math.random() * 3 + 1}px`;
+
+      particle.style.height =
+        particle.style.width;
+
+      particle.style.borderRadius =
+        "50%";
+
+      particle.style.background =
+        "rgba(205,225,250,.8)";
+
+      particle.style.boxShadow =
+        "0 0 12px rgba(160,200,245,.8)";
+
+      particle.style.pointerEvents =
+        "none";
+
+      particle.style.zIndex =
+        "1";
+
+      section.appendChild(
+        particle
+      );
+
+      const duration =
+        1500 +
+        Math.random() *
+          1800;
 
       particle.animate(
         [
           {
-            transform: "translate3d(0,0,0) scale(.5)",
+            transform:
+              "translate3d(0,0,0) scale(.5)",
             opacity: 0
           },
           {
-            transform: `translate3d(${Utils.random(-80,80)}px, -${Utils.random(150,420)}px, 0) scale(1)`,
+            transform:
+              `translate3d(${Utils.random(
+                -80,
+                80
+              )}px, -${Utils.random(
+                150,
+                420
+              )}px, 0) scale(1)`,
             opacity: 1
           },
           {
-            transform: `translate3d(${Utils.random(-130,130)}px, -${Utils.random(350,650)}px, 0) scale(0)`,
+            transform:
+              `translate3d(${Utils.random(
+                -130,
+                130
+              )}px, -${Utils.random(
+                350,
+                650
+              )}px, 0) scale(0)`,
             opacity: 0
           }
         ],
         {
           duration,
-          easing: "cubic-bezier(.2,.8,.2,1)"
+          easing:
+            "cubic-bezier(.2,.8,.2,1)"
         }
       );
 
-      setTimeout(() => particle.remove(), duration + 100);
+      setTimeout(
+        () => particle.remove(),
+        duration + 100
+      );
     }
   }
 };
 
+
 /* =========================================================
-   START
+   PIN LOCK — 230226
 ========================================================= */
 
-document.addEventListener("DOMContentLoaded", () => {
-  App.init();
-});
+const PinLock = {
+  correctPin: "230226",
+  enteredPin: "",
+  unlocked: false,
+
+  init() {
+    const screen =
+      Utils.$("#pinLock");
+
+    if (!screen) return;
+
+    document.body.classList.add(
+      "pin-locked"
+    );
+
+    const input =
+      Utils.$("#pinInput");
+
+    const button =
+      Utils.$("#pinSubmit");
+
+    const error =
+      Utils.$("#pinError");
+
+    const keypad =
+      Utils.$("#pinKeypad");
+
+    const clear =
+      Utils.$("#pinClear");
+
+    const backspace =
+      Utils.$("#pinBackspace");
+
+    if (button && input) {
+      button.addEventListener(
+        "click",
+        () => this.submit()
+      );
+
+      input.addEventListener(
+        "keydown",
+        event => {
+          if (
+            event.key ===
+            "Enter"
+          ) {
+            this.submit();
+          }
+        }
+      );
+
+      input.addEventListener(
+        "input",
+        () => {
+          input.value =
+            input.value
+              .replace(/\D/g, "")
+              .slice(0, 6);
+
+          this.enteredPin =
+            input.value;
+
+          error &&
+            error.classList.remove(
+              "show"
+            );
+        }
+      );
+    }
+
+    if (keypad) {
+      keypad.addEventListener(
+        "click",
+        event => {
+          const key =
+            event.target.closest(
+              "[data-pin]"
+            );
+
+          if (!key) return;
+
+          this.addDigit(
+            key.dataset.pin
+          );
+        }
+      );
+    }
+
+    clear?.addEventListener(
+      "click",
+      () => this.clear()
+    );
+
+    backspace?.addEventListener(
+      "click",
+      () => this.backspace()
+    );
+
+    input?.focus();
+  },
+
+  addDigit(digit) {
+    if (
+      this.enteredPin.length >= 6
+    ) {
+      return;
+    }
+
+    this.enteredPin += digit;
+
+    const input =
+      Utils.$("#pinInput");
+
+    if (input) {
+      input.value =
+        this.enteredPin;
+    }
+
+    Utils.$("#pinError")
+      ?.classList.remove(
+        "show"
+      );
+
+    if (
+      this.enteredPin.length === 6
+    ) {
+      setTimeout(
+        () => this.submit(),
+        100
+      );
+    }
+  },
+
+  backspace() {
+    this.enteredPin =
+      this.enteredPin.slice(
+        0,
+        -1
+      );
+
+    const input =
+      Utils.$("#pinInput");
+
+    if (input) {
+      input.value =
+        this.enteredPin;
+    }
+  },
+
+  clear() {
+    this.enteredPin = "";
+
+    const input =
+      Utils.$("#pinInput");
+
+    if (input) {
+      input.value = "";
+      input.focus();
+    }
+
+    Utils.$("#pinError")
+      ?.classList.remove(
+        "show"
+      );
+  },
+
+  submit() {
+    const error =
+      Utils.$("#pinError");
+
+    if (
+      this.enteredPin !==
+      this.correctPin
+    ) {
+      error?.classList.add(
+        "show"
+      );
+
+      this.shake();
+
+      this.enteredPin = "";
+
+      const input =
+        Utils.$("#pinInput");
+
+      if (input) {
+        input.value = "";
+        input.focus();
+      }
+
+      return;
+    }
+
+    this.unlock();
+  },
+
+  shake() {
+    const screen =
+      Utils.$("#pinLock");
+
+    if (!screen) return;
+
+    screen.classList.remove(
+      "pin-shake"
+    );
+
+    void screen.offsetWidth;
+
+    screen.classList.add(
+      "pin-shake"
+    );
+  },
+
+  unlock() {
+    if (this.unlocked) return;
+
+    this.unlocked = true;
+
+    const screen =
+      Utils.$("#pinLock");
+
+    screen.classList.add(
+      "unlocked"
+    );
+
+    document.body.classList.remove(
+      "pin-locked"
+    );
+
+    setTimeout(() => {
+      screen.remove();
+    }, 850);
+
+    AudioManager.tryPlay();
+  }
+};
+
+
+/* =========================================================
+   PAGE NAVIGATION
+   Tombol "Lanjut" untuk berpindah section
+========================================================= */
+
+const PageNavigation = {
+  init() {
+    const buttons =
+      Utils.$$("[data-next-section]");
+
+    buttons.forEach(button => {
+      button.addEventListener(
+        "click",
+        event => {
+          event.preventDefault();
+
+          const targetId =
+            button.dataset.nextSection;
+
+          const target =
+            document.getElementById(
+              targetId
+            );
+
+          if (!target) return;
+
+          target.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+          });
+        }
+      );
+    });
+  }
+};
+
+
+/* =========================================================
+   EXTRA DECORATIONS
+   50+ decorative objects
+========================================================= */
+
+const Decorations = {
+  symbols: [
+    "✦",
+    "✧",
+    "⋆",
+    "✶",
+    "✷",
+    "✹",
+    "◇",
+    "◆",
+    "♡",
+    "♥",
+    "❖",
+    "✵",
+    "✺",
+    "✻",
+    "✼",
+    "✿",
+    "❀",
+    "❁",
+    "⋄",
+    "⁕"
+  ],
+
+  init() {
+    const sections =
+      Utils.$$(".page-section");
+
+    sections.forEach(
+      (section, sectionIndex) => {
+        const amount =
+          sectionIndex === 0
+            ? 4
+            : 7;
+
+        for (
+          let i = 0;
+          i < amount;
+          i++
+        ) {
+          this.create(
+            section,
+            sectionIndex,
+            i
+          );
+        }
+      }
+    );
+  },
+
+  create(
+    section,
+    sectionIndex,
+    index
+  ) {
+    const ornament =
+      document.createElement(
+        "span"
+      );
+
+    ornament.className =
+      "generated-ornament";
+
+    ornament.textContent =
+      this.symbols[
+        (sectionIndex * 7 +
+          index) %
+          this.symbols.length
+      ];
+
+    ornament.style.left =
+      `${Utils.randomInt(
+        4,
+        94
+      )}%`;
+
+    ornament.style.top =
+      `${Utils.randomInt(
+        6,
+        92
+      )}%`;
+
+    ornament.style.animationDelay =
+      `${Utils.random(
+        0,
+        5
+      )}s`;
+
+    ornament.style.animationDuration =
+      `${Utils.random(
+        5,
+        10
+      )}s`;
+
+    ornament.style.opacity =
+      Utils.random(
+        .16,
+        .48
+      );
+
+    section.appendChild(
+      ornament
+    );
+  }
+};
+
+
+/* =========================================================
+   CAKE INTERACTION EXTENSION
+========================================================= */
+
+const CakeMotion = {
+  rotation: 0,
+  playing: true,
+  dragging: false,
+  startX: 0,
+  startRotation: 0,
+
+  init() {
+    const cake =
+      Utils.$("#cake3d") ||
+      Utils.$(".cake-3d");
+
+    if (!cake) return;
+
+    const rotateButton =
+      Utils.$("#cakeRotateBtn");
+
+    const pauseButton =
+      Utils.$("#cakePauseBtn");
+
+    const blowButton =
+      Utils.$("#blowCandleBtn");
+
+    rotateButton?.addEventListener(
+      "click",
+      () => {
+        this.playing = true;
+
+        cake.classList.add(
+          "cake-auto-rotate"
+        );
+      }
+    );
+
+    pauseButton?.addEventListener(
+      "click",
+      () => {
+        this.playing = false;
+
+        cake.classList.remove(
+          "cake-auto-rotate"
+        );
+      }
+    );
+
+    cake.addEventListener(
+      "pointerdown",
+      event => {
+        this.dragging = true;
+        this.startX =
+          event.clientX;
+
+        cake.setPointerCapture?.(
+          event.pointerId
+        );
+      }
+    );
+
+    cake.addEventListener(
+      "pointermove",
+      event => {
+        if (!this.dragging) return;
+
+        const diff =
+          event.clientX -
+          this.startX;
+
+        cake.style.setProperty(
+          "--cake-drag",
+          `${diff}px`
+        );
+      }
+    );
+
+    cake.addEventListener(
+      "pointerup",
+      event => {
+        this.dragging = false;
+
+        cake.releasePointerCapture?.(
+          event.pointerId
+        );
+      }
+    );
+
+    cake.addEventListener(
+      "pointercancel",
+      () => {
+        this.dragging = false;
+      }
+    );
+  }
+};
+
+
+/* =========================================================
+   FINAL INIT
+========================================================= */
+
+document.addEventListener(
+  "DOMContentLoaded",
+  () => {
+    App.init();
+
+    /*
+      PIN dan fitur tambahan dijalankan
+      setelah aplikasi utama siap.
+    */
+    PinLock.init();
+    PageNavigation.init();
+    Decorations.init();
+    CakeMotion.init();
+  }
+);
